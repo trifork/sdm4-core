@@ -23,15 +23,14 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class StatusReporterTest {
-    
     @Configuration
     static class TestConfiguration {
         @Bean
         public Inbox inbox() {
             Inbox inbox = mock(Inbox.class);
             return inbox;
-
         }
+
         @Bean
         public StatusReporter statusReporter() {
             return new StatusReporter();

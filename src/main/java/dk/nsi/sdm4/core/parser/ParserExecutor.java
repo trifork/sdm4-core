@@ -16,62 +16,68 @@ import dk.sdsd.nsp.slalog.api.SLALogger;
 import org.springframework.transaction.annotation.Transactional;
 
 public class ParserExecutor {
-    @Autowired
-    Parser parser;
+	@Autowired
+	Parser parser;
 
-    @Autowired
-    Inbox inbox;
+	@Autowired
+	Inbox inbox;
 
 	@Autowired
 	ImportStatusRepository importStatusRepo;
 
-    @Autowired
-    private SLALogger slaLogger;
+	@Autowired
+	private SLALogger slaLogger;
 
-    private static final Logger logger = Logger.getLogger(ParserExecutor.class);
+	private static final Logger logger = Logger.getLogger(ParserExecutor.class);
 
-    @Scheduled(fixedDelay = 1000)
-    @Transactional
-    public void run() {
-        String parserIdentifier = parser.getHome();
-        SLALogItem slaLogItem = slaLogger.createLogItem("ParserExecutor", "Executing parser " + parserIdentifier);
+	@Scheduled(fixedDelay = 1000)
+	@Transactional
+	public void run() {
+		String parserIdentifier = parser.getHome();
+		SLALogItem slaLogItem = slaLogger.createLogItem("ParserExecutor", "Executing parser " + parserIdentifier);
 
-        try {
-	        if(logger.isDebugEnabled()) {
-	            logger.debug("Running parser " + parser.getHome());
-	        }
+		try {
+			if (!inbox.isLocked()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Running parser " + parser.getHome());
+				}
 
-	        inbox.update();
-	        File dataSet = inbox.top();
+				inbox.update();
+				File dataSet = inbox.top();
 
-	        if (dataSet != null && !inbox.isLocked()) {
-		        importStatusRepo.importStartedAt(new DateTime());
-	            parser.process(dataSet);
+				if (dataSet != null) {
+					importStatusRepo.importStartedAt(new DateTime());
+					parser.process(dataSet);
 
-	            // Once the import is complete
-	            // we can remove of the data set
-	            // from the inbox.
-	            inbox.advance();
+					// Once the import is complete
+					// we can remove of the data set
+					// from the inbox.
+					inbox.advance();
 
 
-		        slaLogItem.setCallResultOk();
-		        slaLogItem.store();
+					slaLogItem.setCallResultOk();
+					slaLogItem.store();
 
-		        importStatusRepo.importEndedAt(new DateTime(), ImportStatus.Outcome.SUCCESS);
-	        } // if there is no data and no error, we never call store on the log item, which is okay
-        } catch (Exception e) {
-	        try {
-	            inbox.lock();
-	        } catch (RuntimeException lockExc) {
-		        logger.error("Unable to lock " + inbox, lockExc);
-	        }
+					importStatusRepo.importEndedAt(new DateTime(), ImportStatus.Outcome.SUCCESS);
+				} // if there is no data and no error, we never call store on the log item, which is okay
+			} else {
+				if (logger.isDebugEnabled()) {
+					logger.debug(inbox + " for parser " + parser.getHome() + " is locked");
+				}
+			}
+		} catch (Exception e) {
+			try {
+				inbox.lock();
+			} catch (RuntimeException lockExc) {
+				logger.error("Unable to lock " + inbox, lockExc);
+			}
 
-	        slaLogItem.setCallResultError("Parser " + parserIdentifier + " failed - Cause: " + e.getMessage());
-            slaLogItem.store();
+			slaLogItem.setCallResultError("Parser " + parserIdentifier + " failed - Cause: " + e.getMessage());
+			slaLogItem.store();
 
-	        importStatusRepo.importEndedAt(new DateTime(), ImportStatus.Outcome.FAILURE);
+			importStatusRepo.importEndedAt(new DateTime(), ImportStatus.Outcome.FAILURE);
 
-	        throw new RuntimeException("runParserOnInbox on parser " + parserIdentifier +" failed", e); // to make sure the transaction rolls back
-        }
-    }
+			throw new RuntimeException("runParserOnInbox on parser " + parserIdentifier + " failed", e); // to make sure the transaction rolls back
+		}
+	}
 }
