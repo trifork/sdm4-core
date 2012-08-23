@@ -2,9 +2,11 @@ package dk.nsi.sdm4.core.config;
 
 import com.googlecode.flyway.core.Flyway;
 import dk.nsi.sdm4.core.parser.Inbox;
+import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserExecutor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -14,19 +16,13 @@ import static org.mockito.Mockito.mock;
 
 @Configuration
 @EnableTransactionManagement
+@PropertySource("test.properties")
 public class StamdataTestConfiguration extends StamdataConfiguration {
     //Make sure to override all methods on StamdataConfiguration with mock methods
 
     @Bean
     public DataSource dataSource() {
         return mock(DataSource.class);
-/*
-        return new JndiObjectFactoryBean() {{
-            setJndiName("TEST");
-            setDefaultObject(mock(DataSource.class));
-            setExpectedType(DataSource.class);
-        }};
-*/
     }
 
     @Bean
@@ -45,7 +41,8 @@ public class StamdataTestConfiguration extends StamdataConfiguration {
         return mock(Inbox.class);
     }
 
-    public Unmarshaller jaxbMarshaller() {
-        return mock(Unmarshaller.class);
-    }
+	@Override
+	public Parser parser() {
+		return mock(Parser.class);
+	}
 }

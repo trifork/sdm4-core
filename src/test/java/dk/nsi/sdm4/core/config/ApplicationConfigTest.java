@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +32,7 @@ public class ApplicationConfigTest {
 
     @Configuration
     @Import({StamdataTestConfiguration.class})
-    static class TestConfiguration implements StamdataConfigurationSupport {
+    static class TestConfiguration {
         @Bean
         public Parser parser() {
             return mock(Parser.class);
