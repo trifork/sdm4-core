@@ -1,6 +1,7 @@
 package dk.nsi.sdm4.core.status;
 
 import dk.nsi.sdm4.core.parser.Parser;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,8 @@ import java.sql.SQLException;
 
 @Repository
 public class ImportStatusRepositoryJdbcImpl implements ImportStatusRepository {
+	private static final Logger logger = Logger.getLogger(ImportStatusRepositoryJdbcImpl.class);
+
 	@Value("${spooler.max.days.between.runs}")
 	private int maxDaysBetweenRuns;
 
@@ -109,8 +112,9 @@ public class ImportStatusRepositoryJdbcImpl implements ImportStatusRepository {
     @Override
     public boolean isDBAlive() {
         try {
-            jdbcTemplate.queryForInt("Select 1 from " + statusTableName + " limit 1");
-        } catch(Exception sommeError) {
+            jdbcTemplate.queryForObject("Select max(id) from " + statusTableName, Long.class);
+        } catch(Exception someError) {
+	        logger.debug("Exception when trying to check database", someError);
             return false;
         }
         return true;
