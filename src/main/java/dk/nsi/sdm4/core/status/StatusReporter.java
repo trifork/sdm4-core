@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import dk.nsi.sdm4.core.parser.Inbox;
-import dk.nsi.sdm4.core.status.ImportStatus.Outcome;
 
 @Controller
 public class StatusReporter {
@@ -32,6 +31,8 @@ public class StatusReporter {
             } else if (statusRepo.isOverdue()) {
 	            // status applied later
 	            body = "Is overdue";
+            } else if (!statusRepo.isDBAlive()) { 
+                body = "Database is _NOT_ running correctly";
             } else {
                 status = HttpStatus.OK;
             }

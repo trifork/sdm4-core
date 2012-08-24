@@ -105,4 +105,14 @@ public class ImportStatusRepositoryJdbcImpl implements ImportStatusRepository {
 			return status;
 		}
 	}
+
+    @Override
+    public boolean isDBAlive() {
+        try {
+            jdbcTemplate.queryForInt("Select 1 from " + statusTableName + " limit 1");
+        } catch(Exception sommeError) {
+            return false;
+        }
+        return true;
+    }
 }

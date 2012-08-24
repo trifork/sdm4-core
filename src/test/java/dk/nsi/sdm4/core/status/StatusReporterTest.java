@@ -1,24 +1,24 @@
 package dk.nsi.sdm4.core.status;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import dk.nsi.sdm4.core.parser.Inbox;
-import dk.nsi.sdm4.core.status.StatusReporter;
 import dk.nsi.sdm4.core.status.ImportStatus.Outcome;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
@@ -52,6 +52,7 @@ public class StatusReporterTest {
     @Test
     public void willReturn200underNormalCircumstances() throws Exception {
         when(inbox.isLocked()).thenReturn(false);
+        when(statusRepo.isDBAlive()).thenReturn(true);
         final ResponseEntity<String> response = reporter.reportStatus();
 
         assertEquals(200, response.getStatusCode().value());
@@ -163,4 +164,26 @@ public class StatusReporterTest {
 		assertTrue("nævner at job er overdue", response.getBody().toLowerCase().contains("overdue"));
 	}
 
+    @Test
+    public void reportsDBIsAlive() {
+        when(statusRepo.isDBAlive()).thenReturn(true);
+        when(inbox.isLocked()).thenReturn(false);
+        when(statusRepo.isOverdue()).thenReturn(false);
+
+        final ResponseEntity<String> response = reporter.reportStatus();
+        assertEquals(200, response.getStatusCode().value());
+
+        assertFalse(response.getBody().contains("Database is _NOT_ running correctly"));
+    }
+
+    @Test
+    public void reportsDBIsNotAlive() {
+        when(statusRepo.isDBAlive()).thenReturn(false);
+        when(inbox.isLocked()).thenReturn(false);
+
+        final ResponseEntity<String> response = reporter.reportStatus();
+        assertEquals(500, response.getStatusCode().value());
+
+        assertTrue(response.getBody().contains("Database is _NOT_ running correctly"));
+    }
 }
