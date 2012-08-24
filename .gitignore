@@ -6,3 +6,7 @@ target
 .classpath
 .project
 
+# Mac #
+###########
+.DS_Store
+
