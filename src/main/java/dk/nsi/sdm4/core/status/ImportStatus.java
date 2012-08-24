@@ -43,10 +43,12 @@ public class ImportStatus {
 
 		if (endTime != null) {
 			body += " and ended at: " + this.getEndTime();
+		} else {
+			body += " and is still running";
 		}
 
-		if(outcome != null && outcome.equals(Outcome.FAILURE)) {
-			body += ". Outcome was " + Outcome.FAILURE;
+		if(outcome != null) {
+			body += ". Outcome was " + outcome;
 		}
 
 		return body;

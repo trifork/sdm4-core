@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 @Repository
 public class ImportStatusRepositoryJdbcImpl implements ImportStatusRepository {
@@ -99,7 +100,10 @@ public class ImportStatusRepositoryJdbcImpl implements ImportStatusRepository {
 		public ImportStatus mapRow(ResultSet rs, int rowNum) throws SQLException {
 			ImportStatus status = new ImportStatus();
 			status.setStartTime(new DateTime(rs.getTimestamp("StartTime")));
-			status.setEndTime(new DateTime(rs.getTimestamp("EndTime")));
+			Timestamp endTime = rs.getTimestamp("EndTime");
+			if (endTime != null) {
+				status.setEndTime(new DateTime(endTime));
+			}
 			String dbOutcome = rs.getString("Outcome");
 			if (dbOutcome != null) {
 				status.setOutcome(ImportStatus.Outcome.valueOf(dbOutcome));
