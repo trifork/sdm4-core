@@ -45,12 +45,7 @@ public class DbMigrator {
 	private void doMigrations() {
 		List<Migration> migrations = migrationFinder.findMigrations();
 
-		Collections.sort(migrations, new Comparator<Migration>() {
-			@Override
-			public int compare(Migration migration, Migration other) {
-				return migration.getVersion().compareTo(other.getVersion());
-			}
-		});
+		Collections.sort(migrations, new MigrationComparator());
 
 		for (Migration migration : migrations) {
 			log.info("Migrating to " + migration);
@@ -78,4 +73,5 @@ public class DbMigrator {
 			}
 		});
 	}
+
 }

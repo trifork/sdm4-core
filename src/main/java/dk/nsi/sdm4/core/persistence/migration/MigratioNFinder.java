@@ -7,12 +7,11 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class MigrationFinder {
 	private static final Logger log = Logger.getLogger(MigrationFinder.class);
-	private static final String baseDir = "dk/nsi/sdm4/core/persistence/recordpersister/testmigrations";
+	private static final String baseDir = "db/migration";
 	private static final String sqlMigrationPrefix = "V";
 	private static final String sqlMigrationSuffix = ".sql";
 

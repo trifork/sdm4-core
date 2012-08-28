@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -83,7 +82,7 @@ public class DbMigratorTest {
 	@Test
 	public void willRun1Migration() {
 		List<Migration> migrations = Arrays.asList(
-				new Migration(new ClassPathResource("testmigrations/V20010101_0101__TestMigration1.sql")));
+				new Migration(new ClassPathResource("db/migration/V20010101_0101__TestMigration1.sql")));
 		when(migrationFinder.findMigrations()).thenReturn(migrations);
 
 		migrator.migrate();
@@ -94,8 +93,8 @@ public class DbMigratorTest {
 	@Test
 	public void willRun2MigrationsInCorrectOrder() {
 		List<Migration> migrations = Arrays.asList(
-				new Migration(new ClassPathResource("testmigrations/V20010102_0101__TestMigration2.sql")),
-				new Migration(new ClassPathResource("testmigrations/V20010101_0101__TestMigration1.sql")));
+				new Migration(new ClassPathResource("db/migration/V20010102_0101__TestMigration2.sql")),
+				new Migration(new ClassPathResource("db/migration/V20010101_0101__TestMigration1.sql")));
 		when(migrationFinder.findMigrations()).thenReturn(migrations);
 
 		migrator.migrate();
