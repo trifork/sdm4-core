@@ -49,8 +49,16 @@ public class DbMigrator {
 
 		for (Migration migration : migrations) {
 			log.info("Migrating to " + migration);
-			jdbcTemplate.update(migration.getSql());
+			if (!migrationHasBeenRun(migration)) {
+				jdbcTemplate.update(migration.getSql());
+				jdbcTemplate.update("INSERT INTO " + METADATA_TABLE_NAME + " (version, description, installed_by) VALUES (?, ?, SUBSTRING_INDEX(USER(),'@',1))",
+						migration.getVersion(), migration.getDescription());
+			}
 		}
+	}
+
+	private boolean migrationHasBeenRun(Migration migration) {
+		return 0 < jdbcTemplate.queryForInt("SELECT COUNT(*) FROM " + METADATA_TABLE_NAME + " WHERE version = ?", migration.getVersion());
 	}
 
 	private void createMetadataTable() {

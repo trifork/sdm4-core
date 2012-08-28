@@ -99,6 +99,16 @@ public class DbMigratorTest {
 		jdbcTemplate.queryForObject("SELECT max(TestColumnAfterAlter) from TestMigration1", Date.class); // throws exception if table does not exist
 	}
 
+	@Test
+	public void willIgnoreMigrationsItHasRunBefore() {
+		migrateWith("testmigrations/V20010101_0101__TestMigration1.sql");
+		migrator.migrate();
+
+		migrateWith("testmigrations/V20010101_0101__TestMigration1.sql"); // this migration will fail if run two times
+		migrator.migrate();
+	}
+
+
 	private void migrateWith(String... migrationPaths) {
 		List<Migration> migrations = new ArrayList<Migration>();
 
