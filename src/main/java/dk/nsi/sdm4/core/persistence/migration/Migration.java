@@ -1,14 +1,16 @@
 package dk.nsi.sdm4.core.persistence.migration;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Migration {
+public class Migration implements Comparable<Migration> {
 	private String version;
 	private String description;
 	private Resource sqlSource;
@@ -55,5 +57,10 @@ public class Migration {
 	@Override
 	public String toString() {
 		return "Migration[version=" + version + ", description=" + description + "]";
+	}
+
+	@Override
+	public int compareTo(Migration other) {
+			return this.getVersion().compareTo(other.getVersion());
 	}
 }

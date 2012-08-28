@@ -45,8 +45,6 @@ public class DbMigrator {
 	private void doMigrations() {
 		List<Migration> migrations = migrationFinder.findMigrations();
 
-		Collections.sort(migrations, new MigrationComparator());
-
 		for (Migration migration : migrations) {
 			log.info("Migrating to " + migration);
 			if (!migrationHasBeenRun(migration)) {

@@ -90,9 +90,10 @@ public class DbMigratorTest {
 	}
 
 	@Test
-	public void willRun2MigrationsInCorrectOrder() {
-		migrateWith("testmigrations/V20010103_0101__TestMigration3.sql",
-				"testmigrations/V20010101_0101__TestMigration1.sql");
+	public void willRun2MigrationsInTheOrderProvidedByTheFinder() {
+		// we test elsewhere that the default migrationfinder sorts the migrations
+		migrateWith("testmigrations/V20010101_0101__TestMigration1.sql",
+				"testmigrations/V20010103_0101__TestMigration3.sql");
 
 		migrator.migrate();
 

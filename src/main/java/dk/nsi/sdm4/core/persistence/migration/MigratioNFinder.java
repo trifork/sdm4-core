@@ -7,6 +7,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MigrationFinder {
@@ -39,6 +40,8 @@ public class MigrationFinder {
 		} catch (IOException e) {
 			throw new DbMigratorException("Error loading sql testmigrations files", e);
 		}
+
+		Collections.sort(migrations);
 
 		return migrations;
 	}
