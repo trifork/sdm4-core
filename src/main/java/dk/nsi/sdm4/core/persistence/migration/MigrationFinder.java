@@ -35,7 +35,12 @@ public class MigrationFinder {
 					.getResources("classpath:" + searchRoot + searchPattern);
 
 			for (Resource resource : resources) {
-				migrations.add(new Migration(resource));
+				Migration migration = new Migration(resource);
+				if (migration.isValid()) {
+				migrations.add(migration);
+				} else {
+					log.info("Ignoring resource " + resource.getDescription() + " as it's name does not match the migration name pattern");
+				}
 			}
 		} catch (IOException e) {
 			throw new DbMigratorException("Error loading sql testmigrations files", e);

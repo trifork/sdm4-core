@@ -16,6 +16,7 @@ public class Migration implements Comparable<Migration> {
 	private Resource sqlSource;
 
 	private static final Pattern migrationNamePattern = Pattern.compile(".*/?V(\\d{8}_\\d{4})__(.*).sql");
+	private boolean valid;
 
 	protected Migration(String version, String description, Resource sqlSource) {
 		// used for testing
@@ -31,9 +32,13 @@ public class Migration implements Comparable<Migration> {
 
 	private void parseResourcename() {
 		Matcher matcher = migrationNamePattern.matcher(sqlSource.getFilename());
-		matcher.find();
-		version = matcher.group(1);
-		description = matcher.group(2);
+		if (matcher.find()) {
+			valid = true;
+			version = matcher.group(1);
+			description = matcher.group(2);
+		} else {
+			valid = false;
+		}
 	}
 
 	public String getVersion() {
@@ -59,6 +64,10 @@ public class Migration implements Comparable<Migration> {
 		}
 
 		return output.toString();
+	}
+
+	public boolean isValid() {
+		return valid;
 	}
 
 	@Override
