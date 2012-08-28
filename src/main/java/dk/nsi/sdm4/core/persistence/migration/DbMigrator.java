@@ -1,6 +1,5 @@
 package dk.nsi.sdm4.core.persistence.migration;
 
-import dk.nsi.sdm4.core.persistence.MigrationFinder;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;

@@ -1,7 +1,5 @@
-package dk.nsi.sdm4.core.persistence;
+package dk.nsi.sdm4.core.persistence.migration;
 
-import dk.nsi.sdm4.core.persistence.migration.DbMigratorException;
-import dk.nsi.sdm4.core.persistence.migration.Migration;
 import org.apache.log4j.Logger;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
