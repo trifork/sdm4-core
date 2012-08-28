@@ -17,10 +17,10 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -91,7 +91,7 @@ public class DbMigratorTest {
 
 	@Test
 	public void willRun2MigrationsInCorrectOrder() {
-		migrateWith("testmigrations/V20010102_0101__TestMigration2.sql",
+		migrateWith("testmigrations/V20010103_0101__TestMigration3.sql",
 				"testmigrations/V20010101_0101__TestMigration1.sql");
 
 		migrator.migrate();
@@ -108,6 +108,21 @@ public class DbMigratorTest {
 		migrator.migrate();
 	}
 
+	@Test
+	public void willRunOlderMigrationsIfNotSeenBefore() {
+		migrateWith("testmigrations/V20010101_0101__TestMigration1.sql",
+				"testmigrations/V20010103_0101__TestMigration3.sql");
+
+		migrator.migrate();
+		assertEquals(2, jdbcTemplate.queryForInt("SELECT DISTINCT count(version) from " + DbMigrator.METADATA_TABLE_NAME + " WHERE version=? or version=?",
+				"20010101_0101", "20010103_0101")); // make sure the two migrations are run
+
+		migrateWith("testmigrations/V20010102_0101__TestMigration2.sql");
+		migrator.migrate();
+
+
+		jdbcTemplate.queryForObject("SELECT max(TestColumn) from TestMigration2", Date.class); // throws exception if table does not exist
+	}
 
 	private void migrateWith(String... migrationPaths) {
 		List<Migration> migrations = new ArrayList<Migration>();
@@ -117,7 +132,5 @@ public class DbMigratorTest {
 		}
 
 		when(migrationFinder.findMigrations()).thenReturn(migrations);
-
-
 	}
 }
