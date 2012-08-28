@@ -91,8 +91,8 @@ public class DbMigratorTest {
 
 	@Test
 	public void willRun2MigrationsInCorrectOrder() {
-		migrateWith("db/migration/V20010102_0101__TestMigration2.sql",
-				"db/migration/V20010101_0101__TestMigration1.sql");
+		migrateWith("testmigrations/V20010102_0101__TestMigration2.sql",
+				"testmigrations/V20010101_0101__TestMigration1.sql");
 
 		migrator.migrate();
 
