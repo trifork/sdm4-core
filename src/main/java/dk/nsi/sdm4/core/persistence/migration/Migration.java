@@ -51,4 +51,9 @@ public class Migration {
 
 		return output.toString();
 	}
+
+	@Override
+	public String toString() {
+		return "Migration[version=" + version + ", description=" + description + "]";
+	}
 }

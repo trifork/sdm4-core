@@ -8,6 +8,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class MigrationFinder {
 	private static final Logger log = Logger.getLogger(MigrationFinder.class);
@@ -15,10 +16,10 @@ public class MigrationFinder {
 	private static final String sqlMigrationPrefix = "V";
 	private static final String sqlMigrationSuffix = ".sql";
 
-	public Collection<Migration> findMigrations() {
+	public List<Migration> findMigrations() {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-		Collection<Migration> migrations = new ArrayList<Migration>();
+		List<Migration> migrations = new ArrayList<Migration>();
 
 		if (!new ClassPathResource(baseDir + "/", classLoader).exists()) {
 			log.warn("path for sql migrations not found: " + baseDir);

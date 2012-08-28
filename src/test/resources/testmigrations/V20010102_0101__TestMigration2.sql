@@ -1,0 +1,1 @@
+ALTER TABLE TestMigration1 change TestColumn TestColumnAfterAlter datetime DEFAULT NULL

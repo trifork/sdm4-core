@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * Supports migrations in db/testmigrations with names on the form <YYYYMMDD>_<HHMM>__Description.sql
@@ -43,8 +43,17 @@ public class DbMigrator {
 	}
 
 	private void doMigrations() {
-		Collection<Migration> migrations = migrationFinder.findMigrations();
+		List<Migration> migrations = migrationFinder.findMigrations();
+
+		Collections.sort(migrations, new Comparator<Migration>() {
+			@Override
+			public int compare(Migration migration, Migration other) {
+				return migration.getVersion().compareTo(other.getVersion());
+			}
+		});
+
 		for (Migration migration : migrations) {
+			log.info("Migrating to " + migration);
 			jdbcTemplate.update(migration.getSql());
 		}
 	}

@@ -82,11 +82,25 @@ public class DbMigratorTest {
 
 	@Test
 	public void willRun1Migration() {
-		List<Migration> migrations = Arrays.asList(new Migration(new ClassPathResource("testmigrations/V20010101_0101__TestMigration1.sql")));
+		List<Migration> migrations = Arrays.asList(
+				new Migration(new ClassPathResource("testmigrations/V20010101_0101__TestMigration1.sql")));
 		when(migrationFinder.findMigrations()).thenReturn(migrations);
 
 		migrator.migrate();
 
 		jdbcTemplate.queryForObject("SELECT max(TestColumn) from TestMigration1", Date.class); // throws exception if table does not exist
 	}
+
+	@Test
+	public void willRun2MigrationsInCorrectOrder() {
+		List<Migration> migrations = Arrays.asList(
+				new Migration(new ClassPathResource("testmigrations/V20010102_0101__TestMigration2.sql")),
+				new Migration(new ClassPathResource("testmigrations/V20010101_0101__TestMigration1.sql")));
+		when(migrationFinder.findMigrations()).thenReturn(migrations);
+
+		migrator.migrate();
+
+		jdbcTemplate.queryForObject("SELECT max(TestColumnAfterAlter) from TestMigration1", Date.class); // throws exception if table does not exist
+	}
+
 }
