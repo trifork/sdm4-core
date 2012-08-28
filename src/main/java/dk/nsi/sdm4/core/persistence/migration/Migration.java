@@ -17,6 +17,13 @@ public class Migration implements Comparable<Migration> {
 
 	private static final Pattern migrationNamePattern = Pattern.compile(".*/?V(\\d{8}_\\d{4})__(.*).sql");
 
+	protected Migration(String version, String description, Resource sqlSource) {
+		// used for testing
+		this.version = version;
+		this.description = description;
+		this.sqlSource = sqlSource;
+	}
+
 	public Migration(Resource sqlSource) {
 		this.sqlSource = sqlSource;
 		parseResourcename();
