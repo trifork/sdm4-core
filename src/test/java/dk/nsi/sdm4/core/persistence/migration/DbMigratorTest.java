@@ -16,6 +16,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -81,9 +82,7 @@ public class DbMigratorTest {
 
 	@Test
 	public void willRun1Migration() {
-		List<Migration> migrations = Arrays.asList(
-				new Migration(new ClassPathResource("db/migration/V20010101_0101__TestMigration1.sql")));
-		when(migrationFinder.findMigrations()).thenReturn(migrations);
+		migrateWith("db/migration/V20010101_0101__TestMigration1.sql");
 
 		migrator.migrate();
 
@@ -92,14 +91,23 @@ public class DbMigratorTest {
 
 	@Test
 	public void willRun2MigrationsInCorrectOrder() {
-		List<Migration> migrations = Arrays.asList(
-				new Migration(new ClassPathResource("db/migration/V20010102_0101__TestMigration2.sql")),
-				new Migration(new ClassPathResource("db/migration/V20010101_0101__TestMigration1.sql")));
-		when(migrationFinder.findMigrations()).thenReturn(migrations);
+		migrateWith("db/migration/V20010102_0101__TestMigration2.sql",
+				"db/migration/V20010101_0101__TestMigration1.sql");
 
 		migrator.migrate();
 
 		jdbcTemplate.queryForObject("SELECT max(TestColumnAfterAlter) from TestMigration1", Date.class); // throws exception if table does not exist
 	}
 
+	private void migrateWith(String... migrationPaths) {
+		List<Migration> migrations = new ArrayList<Migration>();
+
+		for (String migrationPath : migrationPaths) {
+			migrations.add(new Migration(new ClassPathResource(migrationPath)));
+		}
+
+		when(migrationFinder.findMigrations()).thenReturn(migrations);
+
+
+	}
 }
