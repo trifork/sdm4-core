@@ -9,9 +9,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
- * Supports migrations in db/migration with names on the form <YYYYMMDD>_<HHMM>__Description.sql
+ * Supports migrations in db/testmigrations with names on the form <YYYYMMDD>_<HHMM>__Description.sql
  * Only supports MySQL
  */
 public class DbMigrator {
@@ -29,9 +30,22 @@ public class DbMigrator {
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	MigrationFinder migrationFinder;
+
 	public void migrate() {
 		if (!metadataTableExists()) {
 			createMetadataTable();
+		}
+
+		doMigrations();
+
+	}
+
+	private void doMigrations() {
+		Collection<Migration> migrations = migrationFinder.findMigrations();
+		for (Migration migration : migrations) {
+			jdbcTemplate.update(migration.getSql());
 		}
 	}
 

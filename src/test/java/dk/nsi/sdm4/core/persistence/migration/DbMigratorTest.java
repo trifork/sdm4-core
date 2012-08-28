@@ -3,13 +3,12 @@ package dk.nsi.sdm4.core.persistence.migration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.dao.DataAccessException;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -18,10 +17,13 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -33,8 +35,12 @@ public class DbMigratorTest {
 	static class ContextConfiguration {
 		@Bean
 		public DbMigrator migrator() {
-			DbMigrator dbMigrator = new DbMigrator();
-			return dbMigrator;
+			return new DbMigrator();
+		}
+
+		@Bean
+		public MigrationFinder migrationFinder() {
+			return mock(MigrationFinder.class);
 		}
 	}
 
@@ -44,9 +50,13 @@ public class DbMigratorTest {
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	MigrationFinder migrationFinder;
+
 	@BeforeTransaction
 	public void clearSchema() {
 		jdbcTemplate.update("DROP Table if exists " + DbMigrator.METADATA_TABLE_NAME);
+		jdbcTemplate.update("DROP Table if exists TestMigration1");
 	}
 
 	@Test
@@ -66,6 +76,17 @@ public class DbMigratorTest {
 		}
 
 		migrator.migrate();
+
 		jdbcTemplate.queryForObject(selectSql, Date.class); // throws exception if table does not exist
+	}
+
+	@Test
+	public void willRun1Migration() {
+		List<Migration> migrations = Arrays.asList(new Migration(new ClassPathResource("testmigrations/V20010101_0101__TestMigration1.sql")));
+		when(migrationFinder.findMigrations()).thenReturn(migrations);
+
+		migrator.migrate();
+
+		jdbcTemplate.queryForObject("SELECT max(TestColumn) from TestMigration1", Date.class); // throws exception if table does not exist
 	}
 }
