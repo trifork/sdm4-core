@@ -1,5 +1,7 @@
 package dk.nsi.sdm4.core.persistence.migration;
 
+import com.googlecode.flyway.core.dbsupport.mysql.MySQLSqlScript;
+import com.googlecode.flyway.core.migration.sql.PlaceholderReplacer;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -48,9 +50,17 @@ public class DbMigrator {
 		for (Migration migration : migrations) {
 			log.info("Migrating to " + migration);
 			if (!migrationHasBeenRun(migration)) {
-				jdbcTemplate.update(migration.getSql());
+				MySQLSqlScript script = new MySQLSqlScript(migration.getSql(), PlaceholderReplacer.NO_PLACEHOLDERS);
+				script.execute(jdbcTemplate);
 				jdbcTemplate.update("INSERT INTO " + METADATA_TABLE_NAME + " (version, description, installed_by) VALUES (?, ?, SUBSTRING_INDEX(USER(),'@',1))",
 						migration.getVersion(), migration.getDescription());
+				if (log.isDebugEnabled()) {
+					log.debug("Ran migration " + migration.toString() + ": " + migration.getSql());
+				}
+			} else {
+				if (log.isDebugEnabled()) {
+					log.debug("Migration has already been run: " + migration.toString());
+				}
 			}
 		}
 	}

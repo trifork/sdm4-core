@@ -112,6 +112,17 @@ public class DbMigratorTest {
 	}
 
 	@Test
+	public void willCreateTwoTablesInOneMigration() {
+		migrateWith("testmigrations/V19990000_0000__MultipleCreateTableStatements.sql");
+
+		migrator.migrate();
+
+		jdbcTemplate.queryForObject("SELECT max(TestColumn) from Multiple1", Date.class); // throws exception if table does not exist
+		jdbcTemplate.queryForObject("SELECT max(TestColumn) from Multiple2", Date.class); // throws exception if table does not exist
+
+	}
+
+	@Test
 	public void willRunOlderMigrationsIfNotSeenBefore() {
 		migrateWith("testmigrations/V20010101_0101__TestMigration1.sql",
 				"testmigrations/V20010103_0101__TestMigration3.sql");
