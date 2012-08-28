@@ -31,7 +31,7 @@ public class DbMigrator {
 	JdbcTemplate jdbcTemplate;
 
 	// not springwired to keep importer configurations simpler; we only substitute it for unit testing
-	protected MigrationFinder migrationFinder;
+	protected MigrationFinder migrationFinder = new MigrationFinder();
 
 	public void migrate() {
 		if (!metadataTableExists()) {
