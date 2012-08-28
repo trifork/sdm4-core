@@ -30,8 +30,8 @@ public class DbMigrator {
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
-	@Autowired
-	MigrationFinder migrationFinder;
+	// not springwired to keep importer configurations simpler; we only substitute it for unit testing
+	protected MigrationFinder migrationFinder;
 
 	public void migrate() {
 		if (!metadataTableExists()) {

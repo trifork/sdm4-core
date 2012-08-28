@@ -35,7 +35,9 @@ public class DbMigratorTest {
 	static class ContextConfiguration {
 		@Bean
 		public DbMigrator migrator() {
-			return new DbMigrator();
+			DbMigrator migrator = new DbMigrator();
+			migrator.migrationFinder = migrationFinder();
+			return migrator;
 		}
 
 		@Bean

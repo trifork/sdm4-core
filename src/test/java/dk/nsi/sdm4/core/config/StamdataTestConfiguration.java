@@ -1,13 +1,12 @@
 package dk.nsi.sdm4.core.config;
 
-import com.googlecode.flyway.core.Flyway;
 import dk.nsi.sdm4.core.parser.Inbox;
 import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserExecutor;
+import dk.nsi.sdm4.core.persistence.migration.DbMigrator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.oxm.Unmarshaller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
@@ -32,7 +31,7 @@ public class StamdataTestConfiguration extends StamdataConfiguration {
     }
 
     @Bean
-    public Flyway flyway(DataSource dataSource) {
+    public DbMigrator dbMigrator() {
         return null;
     }
 

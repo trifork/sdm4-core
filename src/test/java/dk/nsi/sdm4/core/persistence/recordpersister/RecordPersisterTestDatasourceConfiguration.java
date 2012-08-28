@@ -1,7 +1,7 @@
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
-import com.googlecode.flyway.core.Flyway;
 import com.mysql.jdbc.Driver;
+import dk.nsi.sdm4.core.persistence.migration.DbMigrator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,10 +42,8 @@ public class RecordPersisterTestDatasourceConfiguration {
 	}
 
 	@Bean(initMethod = "migrate")
-	public Flyway flyway(DataSource dataSource) {
-		Flyway flyway = new Flyway();
-		flyway.setDataSource(dataSource);
-		return flyway;
+	public DbMigrator dbMigrator() {
+		return new DbMigrator();
 	}
 
 	@Bean

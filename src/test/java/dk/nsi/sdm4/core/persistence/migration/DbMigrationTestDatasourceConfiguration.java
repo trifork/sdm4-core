@@ -1,6 +1,5 @@
 package dk.nsi.sdm4.core.persistence.migration;
 
-import com.googlecode.flyway.core.Flyway;
 import com.mysql.jdbc.Driver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
