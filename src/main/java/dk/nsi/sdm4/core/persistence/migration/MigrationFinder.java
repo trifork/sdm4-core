@@ -39,7 +39,7 @@ public class MigrationFinder {
 				if (migration.isValid()) {
 				migrations.add(migration);
 				} else {
-					log.info("Ignoring resource " + resource.getDescription() + " as it's name does not match the migration name pattern");
+					log.warn("Ignoring resource " + resource.getDescription() + " as it's name does not match the migration name pattern");
 				}
 			}
 		} catch (IOException e) {
