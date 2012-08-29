@@ -57,7 +57,7 @@ public class Migration implements Comparable<Migration> {
 			output = new StringWriter();
 			IOUtils.copy(input, output, "UTF-8");
 		} catch (IOException e) {
-			throw new DbMigratorException("Could not get sql from resource " + sqlSource.getDescription(),e);
+			throw new DbMigratorException("Could not get sql from resource " + sqlSource.getDescription(), e);
 		} finally {
 			IOUtils.closeQuietly(input);
 			IOUtils.closeQuietly(output);
@@ -77,6 +77,6 @@ public class Migration implements Comparable<Migration> {
 
 	@Override
 	public int compareTo(Migration other) {
-			return this.getVersion().compareTo(other.getVersion());
+		return this.getVersion().compareTo(other.getVersion());
 	}
 }

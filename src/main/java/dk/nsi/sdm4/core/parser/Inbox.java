@@ -29,67 +29,66 @@ import java.io.IOException;
 
 /**
  * An inbox is a store where parser input is placed.
- * 
+ * <p/>
  * An inbox represents a snapshot of the inbox's state. You have to call the
  * {@code update()} method before new elements are considered.
- * 
+ * <p/>
  * An inbox is essentially a priority queue with slightly different semantics.
- * 
+ *
  * @author Thomas Børlum <thb@trifork.com>
  */
 public interface Inbox {
-    /**
-     * Gets the top-most data set in the inbox.
-     * 
-     * The top-most (next) must always be handled before any others to ensure
-     * data integrity.
-     * 
-     * It is on the other hand not the inbox's responsibility to check the
-     * import sequence. This is up to the respective parsers.
-     * 
-     * @return the top-most data set from the inbox, or null if non are ready.
-     */
-    File top();
+	/**
+	 * Gets the top-most data set in the inbox.
+	 * <p/>
+	 * The top-most (next) must always be handled before any others to ensure
+	 * data integrity.
+	 * <p/>
+	 * It is on the other hand not the inbox's responsibility to check the
+	 * import sequence. This is up to the respective parsers.
+	 *
+	 * @return the top-most data set from the inbox, or null if non are ready.
+	 */
+	File top();
 
-    /**
-     * Disposes of the top-most element and moves the next.
-     * 
-     * This should only be called when an element has been successfully
-     * imported.
-     * 
-     * This has no effect if the inbox is empty.
-     * 
-     * @throws IllegalStateException
-     *             thrown if {@link #advance()} called while the inbox is empty.
-     */
-    void advance() throws IOException;
+	/**
+	 * Disposes of the top-most element and moves the next.
+	 * <p/>
+	 * This should only be called when an element has been successfully
+	 * imported.
+	 * <p/>
+	 * This has no effect if the inbox is empty.
+	 *
+	 * @throws IllegalStateException thrown if {@link #advance()} called while the inbox is empty.
+	 */
+	void advance() throws IOException;
 
-    /**
-     * The number of data sets that are ready for handling.
-     * 
-     * This count only shows the number of data sets that are ready for import
-     * from the top down.
-     * 
-     * @return the number of elements in the inbox.
-     */
-    int readyCount();
+	/**
+	 * The number of data sets that are ready for handling.
+	 * <p/>
+	 * This count only shows the number of data sets that are ready for import
+	 * from the top down.
+	 *
+	 * @return the number of elements in the inbox.
+	 */
+	int readyCount();
 
-    /**
-     * Updates the inbox's state.
-     * 
-     * This should be called before the initial call to {@code top()}.
-     * Subsequent calls will refresh the state including {@link #readyCount},
-     * top-most data set, etc.
-     */
-    void update() throws IOException;
+	/**
+	 * Updates the inbox's state.
+	 * <p/>
+	 * This should be called before the initial call to {@code top()}.
+	 * Subsequent calls will refresh the state including {@link #readyCount},
+	 * top-most data set, etc.
+	 */
+	void update() throws IOException;
 
-    /**
-     * Locks the inbox.
-     */
-    void lock();
+	/**
+	 * Locks the inbox.
+	 */
+	void lock();
 
-    /**
-     * Checks if the inbox is locked.
-     */
-    boolean isLocked();
+	/**
+	 * Checks if the inbox is locked.
+	 */
+	boolean isLocked();
 }

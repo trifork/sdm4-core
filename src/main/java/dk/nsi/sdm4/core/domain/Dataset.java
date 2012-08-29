@@ -34,64 +34,53 @@ import java.util.List;
 import java.util.Map;
 
 @Deprecated
-public class Dataset<T extends TemporalEntity>
-{
-    private static final Logger logger = Logger.getLogger(Dataset.class);
-    
+public class Dataset<T extends TemporalEntity> {
+	private static final Logger logger = Logger.getLogger(Dataset.class);
+
 	private final Map<Object, T> entities = new HashMap<Object, T>();
 	private final Class<T> type;
 
-	public Dataset(Class<T> type)
-	{
-	    this.type = type;
+	public Dataset(Class<T> type) {
+		this.type = type;
 	}
 
-	public Dataset(List<T> records, Class<T> type)
-	{
+	public Dataset(List<T> records, Class<T> type) {
 		this(type);
 
-		for (T record : records)
-		{
+		for (T record : records) {
 			add(record);
 		}
 	}
 
-	public int size()
-	{
+	public int size() {
 		return getEntities().size();
 	}
 
-	public Collection<T> getEntities()
-	{
+	public Collection<T> getEntities() {
 		return entities.values();
 	}
 
-	public T getEntityById(Object id)
-	{
+	public T getEntityById(Object id) {
 		return entities.get(id);
 	}
 
-	public boolean containsKey(Object id)
-	{
+	public boolean containsKey(Object id) {
 		return entities.containsKey(id);
 	}
 
-	public Class<T> getType()
-	{
+	public Class<T> getType() {
 		return type;
 	}
 
-	public void add(T entity)
-	{
+	public void add(T entity) {
 		Object id = Entities.getEntityID(entity);
 		Object previousValue = entities.put(id, entity);
-		
-		if (previousValue != null)
-		{
-            // FIXME: This is actually and error, but it has always been this way.
-            // Double keys should not happen.
 
-		    logger.warn("Two entries in a single import contains the same id. type="+type.getSimpleName()+", id=" + id);
+		if (previousValue != null) {
+			// FIXME: This is actually and error, but it has always been this way.
+			// Double keys should not happen.
+
+			logger.warn("Two entries in a single import contains the same id. type=" + type.getSimpleName() + ", id=" + id);
 		}
 	}
 }

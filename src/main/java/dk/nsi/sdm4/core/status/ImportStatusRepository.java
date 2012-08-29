@@ -17,6 +17,6 @@ public interface ImportStatusRepository {
 	ImportStatus getLatestStatus();
 
 	boolean isOverdue();
-	
+
 	boolean isDBAlive();
 }

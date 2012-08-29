@@ -34,38 +34,33 @@ import java.util.List;
  * A Dataset that is the complete truth within the given validfrom-validto
  * interval. That is, no other records are allowed other than the ones in this
  * dataset.
- * 
+ *
  * @author Rune Skou Larsen <rsj@trifork.com>
  */
 @Deprecated
-public class CompleteDataset<T extends TemporalEntity> extends Dataset<T>
-{
+public class CompleteDataset<T extends TemporalEntity> extends Dataset<T> {
 	private final Date ValidFrom;
 	private final Date ValidTo;
 
-	protected CompleteDataset(Class<T> type, List<T> records, Date validFrom, Date ValidTo)
-	{
+	protected CompleteDataset(Class<T> type, List<T> records, Date validFrom, Date ValidTo) {
 		super(records, type);
 
 		this.ValidFrom = validFrom;
 		this.ValidTo = ValidTo;
 	}
 
-	public CompleteDataset(Class<T> type, Date validFrom, Date ValidTo)
-	{
+	public CompleteDataset(Class<T> type, Date validFrom, Date ValidTo) {
 		super(type);
 
 		this.ValidFrom = validFrom;
 		this.ValidTo = ValidTo;
 	}
 
-	public Date getValidFrom()
-	{
+	public Date getValidFrom() {
 		return ValidFrom;
 	}
 
-	public Date getValidTo()
-	{
+	public Date getValidTo() {
 		return ValidTo;
 	}
 }

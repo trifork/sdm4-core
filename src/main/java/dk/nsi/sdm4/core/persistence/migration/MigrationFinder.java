@@ -37,7 +37,7 @@ public class MigrationFinder {
 			for (Resource resource : resources) {
 				Migration migration = new Migration(resource);
 				if (migration.isValid()) {
-				migrations.add(migration);
+					migrations.add(migration);
 				} else {
 					log.warn("Ignoring resource " + resource.getDescription() + " as it's name does not match the migration name pattern");
 				}

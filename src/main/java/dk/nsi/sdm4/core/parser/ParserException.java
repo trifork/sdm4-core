@@ -1,4 +1,4 @@
- /**
+/**
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of
@@ -27,22 +27,18 @@ package dk.nsi.sdm4.core.parser;
 /**
  * @author Thomas Børlum <thb@trifork.com>
  */
-public class ParserException extends RuntimeException
-{
-    private static final long serialVersionUID = 780632659490028872L;
-    
-    public ParserException(String message)
-    {
-        super(message);
-    }
+public class ParserException extends RuntimeException {
+	private static final long serialVersionUID = 780632659490028872L;
 
-    public ParserException(Throwable cause)
-    {
-        super(cause);
-    }
-    
-    public ParserException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+	public ParserException(String message) {
+		super(message);
+	}
+
+	public ParserException(Throwable cause) {
+		super(cause);
+	}
+
+	public ParserException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

@@ -26,19 +26,17 @@
 package dk.nsi.sdm4.core.domain;
 
 import dk.nsi.sdm4.core.util.Dates;
+
 import java.util.Date;
 
 @Deprecated
-public abstract class AbstractStamdataEntity implements TemporalEntity
-{
-	public Object getKey()
-	{
+public abstract class AbstractStamdataEntity implements TemporalEntity {
+	public Object getKey() {
 		return Entities.getEntityID(this);
 	}
 
 	@Override
-	public Date getValidTo()
-	{
+	public Date getValidTo() {
 		return Dates.THE_END_OF_TIME;
 	}
 }

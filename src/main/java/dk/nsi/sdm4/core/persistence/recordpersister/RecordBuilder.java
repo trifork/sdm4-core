@@ -27,98 +27,72 @@ package dk.nsi.sdm4.core.persistence.recordpersister;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class RecordBuilder
-{
-    private RecordSpecification recordSpecification;
-    private Record record;
-    
-    public RecordBuilder(RecordSpecification recordSpecification)
-    {
-        this.recordSpecification = recordSpecification;
-        record = new Record();
-    }
+public class RecordBuilder {
+	private RecordSpecification recordSpecification;
+	private Record record;
 
-    public RecordBuilder field(String fieldName, Object value)
-    {
-        if (value instanceof Integer)
-        {
-            return field(fieldName, (Integer)value);
-        }
-        else if (value instanceof String)
-        {
-            return field(fieldName, (String)value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Values in records must be string or integer. field=" + fieldName);
-        }
-    }
+	public RecordBuilder(RecordSpecification recordSpecification) {
+		this.recordSpecification = recordSpecification;
+		record = new Record();
+	}
 
-    public RecordBuilder field(String fieldName, int value)
-    {
-        return field(fieldName, value, RecordSpecification.RecordFieldType.NUMERICAL);
-    }
-    
-    public RecordBuilder field(String fieldName, String value)
-    {
-        return field(fieldName, value, RecordSpecification.RecordFieldType.ALPHANUMERICAL);
-    }
-    
-    private RecordBuilder field(String fieldName, Object value, RecordSpecification.RecordFieldType recordFieldType)
-    {
-        checkNotNull(fieldName);
-        checkArgument(value == null || getFieldType(fieldName) == recordFieldType, "Field " + fieldName + " is not " + recordFieldType);
-        
-        record = record.put(fieldName, value);
-        
-        return this;
-    }
-    
-    public Record build()
-    {
-        if (recordSpecification.conformsToSpecifications(record))
-        {
-            return record;
-        }
-        else
-        {
-            throw new IllegalStateException("Mandatory fields not set");
-        }
-    }
-    
-    public Record addDummyFieldsAndBuild()
-    {
-        for(RecordSpecification.FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs())
-        {
-            if(!record.containsKey(fieldSpecification.name))
-            {
-            if(fieldSpecification.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL)
-            {
-                record = record.put(fieldSpecification.name, "D");
-            }
-            else if(fieldSpecification.type == RecordSpecification.RecordFieldType.NUMERICAL)
-            {
-                record = record.put(fieldSpecification.name, 0);
-            }
-            else
-            {
-                throw new AssertionError("");
-            }
-            }
-        }
-        return build();
-    }
-    
-    private RecordSpecification.RecordFieldType getFieldType(String fieldName)
-    {
-        for (RecordSpecification.FieldSpecification fieldSpecification: recordSpecification.getFieldSpecs())
-        {
-            if (fieldSpecification.name.equals(fieldName))
-            {
-                return fieldSpecification.type;
-            }
-        }
-        
-        return null;
-    }
+	public RecordBuilder field(String fieldName, Object value) {
+		if (value instanceof Integer) {
+			return field(fieldName, (Integer) value);
+		} else if (value instanceof String) {
+			return field(fieldName, (String) value);
+		} else {
+			throw new IllegalArgumentException("Values in records must be string or integer. field=" + fieldName);
+		}
+	}
+
+	public RecordBuilder field(String fieldName, int value) {
+		return field(fieldName, value, RecordSpecification.RecordFieldType.NUMERICAL);
+	}
+
+	public RecordBuilder field(String fieldName, String value) {
+		return field(fieldName, value, RecordSpecification.RecordFieldType.ALPHANUMERICAL);
+	}
+
+	private RecordBuilder field(String fieldName, Object value, RecordSpecification.RecordFieldType recordFieldType) {
+		checkNotNull(fieldName);
+		checkArgument(value == null || getFieldType(fieldName) == recordFieldType, "Field " + fieldName + " is not " + recordFieldType);
+
+		record = record.put(fieldName, value);
+
+		return this;
+	}
+
+	public Record build() {
+		if (recordSpecification.conformsToSpecifications(record)) {
+			return record;
+		} else {
+			throw new IllegalStateException("Mandatory fields not set");
+		}
+	}
+
+	public Record addDummyFieldsAndBuild() {
+		for (RecordSpecification.FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
+			if (!record.containsKey(fieldSpecification.name)) {
+				if (fieldSpecification.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL) {
+					record = record.put(fieldSpecification.name, "D");
+				} else if (fieldSpecification.type == RecordSpecification.RecordFieldType.NUMERICAL) {
+					record = record.put(fieldSpecification.name, 0);
+				} else {
+					throw new AssertionError("");
+				}
+			}
+		}
+		return build();
+	}
+
+	private RecordSpecification.RecordFieldType getFieldType(String fieldName) {
+		for (RecordSpecification.FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
+			if (fieldSpecification.name.equals(fieldName)) {
+				return fieldSpecification.type;
+			}
+		}
+
+		return null;
+	}
 }

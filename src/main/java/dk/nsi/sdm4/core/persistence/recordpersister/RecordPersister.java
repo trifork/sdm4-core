@@ -37,9 +37,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class RecordPersister
-{
-    private Instant transactionTime;
+public class RecordPersister {
+	private Instant transactionTime;
 
 	@Autowired
 	protected JdbcTemplate jdbcTemplate;
@@ -50,19 +49,16 @@ public class RecordPersister
 	}
 
 
+	public void persist(Record record, RecordSpecification specification) throws SQLException {
+		Preconditions.checkNotNull(record);
+		Preconditions.checkNotNull(specification);
+		Preconditions.checkArgument(specification.conformsToSpecifications(record));
 
-
-	public void persist(Record record, RecordSpecification specification) throws SQLException
-    {
-        Preconditions.checkNotNull(record);
-        Preconditions.checkNotNull(specification);
-        Preconditions.checkArgument(specification.conformsToSpecifications(record));
-
-        // Data dumps from Yderregister and "Sikrede" contains history information and are therefore handled
-        // differently from all other register types. The data contained in each input record is appended directly
-        // to the database instead of updating existing records.
-	    jdbcTemplate.update(createInsertStatementSql(specification), new InsertStatementSetter(record, specification));
-    }
+		// Data dumps from Yderregister and "Sikrede" contains history information and are therefore handled
+		// differently from all other register types. The data contained in each input record is appended directly
+		// to the database instead of updating existing records.
+		jdbcTemplate.update(createInsertStatementSql(specification), new InsertStatementSetter(record, specification));
+	}
 
 	private class InsertStatementSetter implements PreparedStatementSetter {
 		private Record record;
@@ -98,35 +94,32 @@ public class RecordPersister
 	}
 
 
-    public String createInsertStatementSql(RecordSpecification specification)
-    {
-        StringBuilder builder = new StringBuilder();
+	public String createInsertStatementSql(RecordSpecification specification) {
+		StringBuilder builder = new StringBuilder();
 
-        builder.append("INSERT INTO ").append(specification.getTable()).append(" (");
+		builder.append("INSERT INTO ").append(specification.getTable()).append(" (");
 
-        List<String> fieldNames = Lists.newArrayList();
-        List<String> questionMarks = Lists.newArrayList();
+		List<String> fieldNames = Lists.newArrayList();
+		List<String> questionMarks = Lists.newArrayList();
 
-        for (RecordSpecification.FieldSpecification fieldSpecification: specification.getFieldSpecs())
-        {
-            if(fieldSpecification.persistField)
-            {
-                fieldNames.add(fieldSpecification.name);
-                questionMarks.add("?");
-            }
-        }
+		for (RecordSpecification.FieldSpecification fieldSpecification : specification.getFieldSpecs()) {
+			if (fieldSpecification.persistField) {
+				fieldNames.add(fieldSpecification.name);
+				questionMarks.add("?");
+			}
+		}
 
-        fieldNames.add("ValidFrom");
-        questionMarks.add("?");
+		fieldNames.add("ValidFrom");
+		questionMarks.add("?");
 
-        fieldNames.add("ModifiedDate");
-        questionMarks.add("?");
+		fieldNames.add("ModifiedDate");
+		questionMarks.add("?");
 
-        builder.append(StringUtils.join(fieldNames, ", "));
-        builder.append(") VALUES (");
-        builder.append(StringUtils.join(questionMarks, ", "));
-        builder.append(")");
+		builder.append(StringUtils.join(fieldNames, ", "));
+		builder.append(") VALUES (");
+		builder.append(StringUtils.join(questionMarks, ", "));
+		builder.append(")");
 
-        return builder.toString();
-    }
+		return builder.toString();
+	}
 }

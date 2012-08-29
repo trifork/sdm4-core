@@ -24,55 +24,44 @@
  */
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
-public class RecordMySQLTableGenerator
-{
-    public static String createSqlSchema(RecordSpecification recordSpecification)
-    {
-        RecordMySQLTableGenerator creator = new RecordMySQLTableGenerator(recordSpecification);
-        return creator.buildSqlSchema();
-    }
-    
-    private RecordSpecification recordSpecification;
-    
-    private RecordMySQLTableGenerator(RecordSpecification recordSpecification)
-    {
-        this.recordSpecification = recordSpecification;
-    }
-    
-    private String buildSqlSchema()
-    {
-        StringBuilder builder = new StringBuilder();
-        
-        builder.append("CREATE TABLE " + recordSpecification.getTable() + " (\n");
-        
-        builder.append("\tPID BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY");
-        
-        for (RecordSpecification.FieldSpecification fieldSpecification: recordSpecification.getFieldSpecs())
-        {
-            if(fieldSpecification.persistField)
-            {
-                if(fieldSpecification.type == RecordSpecification.RecordFieldType.NUMERICAL)
-                {
-                    builder.append(String.format(",\n\t%s BIGINT", fieldSpecification.name));
-                }
-                else if(fieldSpecification.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL)
-                {
-                    builder.append(String.format(",\n\t%s VARCHAR(%d)", fieldSpecification.name, fieldSpecification.length));
-                }
-                else
-                {
-                    throw new AssertionError("Field specification must have a type.");
-                }
-            }
-        }
-        
-        builder.append(",\n\tValidFrom DateTime NOT NULL");
-        builder.append(",\n\tValidTo DateTime");
+public class RecordMySQLTableGenerator {
+	public static String createSqlSchema(RecordSpecification recordSpecification) {
+		RecordMySQLTableGenerator creator = new RecordMySQLTableGenerator(recordSpecification);
+		return creator.buildSqlSchema();
+	}
 
-        builder.append(",\n\tModifiedDate DateTime NOT NULL");
+	private RecordSpecification recordSpecification;
 
-        builder.append("\n) ENGINE=InnoDB COLLATE=utf8_bin;\n");
-        
-        return builder.toString();
-    }
+	private RecordMySQLTableGenerator(RecordSpecification recordSpecification) {
+		this.recordSpecification = recordSpecification;
+	}
+
+	private String buildSqlSchema() {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("CREATE TABLE " + recordSpecification.getTable() + " (\n");
+
+		builder.append("\tPID BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY");
+
+		for (RecordSpecification.FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
+			if (fieldSpecification.persistField) {
+				if (fieldSpecification.type == RecordSpecification.RecordFieldType.NUMERICAL) {
+					builder.append(String.format(",\n\t%s BIGINT", fieldSpecification.name));
+				} else if (fieldSpecification.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL) {
+					builder.append(String.format(",\n\t%s VARCHAR(%d)", fieldSpecification.name, fieldSpecification.length));
+				} else {
+					throw new AssertionError("Field specification must have a type.");
+				}
+			}
+		}
+
+		builder.append(",\n\tValidFrom DateTime NOT NULL");
+		builder.append(",\n\tValidTo DateTime");
+
+		builder.append(",\n\tModifiedDate DateTime NOT NULL");
+
+		builder.append("\n) ENGINE=InnoDB COLLATE=utf8_bin;\n");
+
+		return builder.toString();
+	}
 }

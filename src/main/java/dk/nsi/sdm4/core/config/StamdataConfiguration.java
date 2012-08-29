@@ -25,33 +25,35 @@ import javax.sql.DataSource;
  * Configuration class extendended by the concrete subclasses in the parser modules
  */
 public abstract class StamdataConfiguration {
-	@Value("${sdm.dataDir}") private String dataDir;
-	@Value("${jdbc.JNDIName}") private String jdbcJNDIName;
+	@Value("${sdm.dataDir}")
+	private String dataDir;
+	@Value("${jdbc.JNDIName}")
+	private String jdbcJNDIName;
 
 	@Bean
-    public ParserExecutor parserExecutor() {
-        return new ParserExecutor();
-    }
+	public ParserExecutor parserExecutor() {
+		return new ParserExecutor();
+	}
 
-    @Bean(initMethod = "migrate")
-    public DbMigrator dbMigrator() {
-        return new DbMigrator();
-    }
+	@Bean(initMethod = "migrate")
+	public DbMigrator dbMigrator() {
+		return new DbMigrator();
+	}
 
-    // this is not automatically registered, see https://jira.springsource.org/browse/SPR-8539
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-        propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(true);
-        propertySourcesPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(false);
+	// this is not automatically registered, see https://jira.springsource.org/browse/SPR-8539
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+		propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(true);
+		propertySourcesPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(false);
 
-        propertySourcesPlaceholderConfigurer.setLocations(new Resource[]{new ClassPathResource("default-config.properties"),new ClassPathResource("config.properties")});
-        
-        return propertySourcesPlaceholderConfigurer;
-    }
+		propertySourcesPlaceholderConfigurer.setLocations(new Resource[]{new ClassPathResource("default-config.properties"), new ClassPathResource("config.properties")});
+
+		return propertySourcesPlaceholderConfigurer;
+	}
 
 	@Bean
-	public DataSource dataSource() throws Exception{
+	public DataSource dataSource() throws Exception {
 		JndiObjectFactoryBean factory = new JndiObjectFactoryBean();
 		factory.setJndiName(jdbcJNDIName);
 		factory.setExpectedType(DataSource.class);

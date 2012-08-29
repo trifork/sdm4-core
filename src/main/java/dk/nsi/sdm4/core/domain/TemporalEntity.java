@@ -32,8 +32,7 @@ import java.util.Date;
 /**
  * @author Rune Skou Larsen <rsj@trifork.com>
  */
-public interface TemporalEntity
-{
+public interface TemporalEntity {
 	public Date getValidFrom();
 
 	public Date getValidTo();

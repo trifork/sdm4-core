@@ -47,7 +47,7 @@ public class ImportStatus {
 			body += " and is still running";
 		}
 
-		if(outcome != null) {
+		if (outcome != null) {
 			body += ". Outcome was " + outcome;
 		}
 

@@ -27,7 +27,6 @@
 package dk.nsi.sdm4.core.util;
 
 import com.google.common.base.Preconditions;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -35,37 +34,31 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class Dates
-{
+public class Dates {
 	public static final Date THE_END_OF_TIME = toDate(2999, 12, 31);
-
 
 
 	public static final DateTimeFormatter yyyyMMddHHmm = DateTimeFormat.forPattern("yyyyMMddHHmm");
 	public static final DateTimeFormatter yyyy_MM_dd = DateTimeFormat.forPattern("yyyy-MM-dd");
 
-	public static String toDateStringISO8601(Date date)
-	{
+	public static String toDateStringISO8601(Date date) {
 		DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd");
 		return formatter.print(date.getTime());
 	}
 
-	public static String toFilenameDatetime(Date date)
-	{
+	public static String toFilenameDatetime(Date date) {
 		DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH-mm-ss");
 		return formatter.print(date.getTime());
 	}
 
-	public static Date toDate(int year, int month, int date)
-	{
+	public static Date toDate(int year, int month, int date) {
 		Calendar cal = Calendar.getInstance();
 		cal.clear();
 		cal.set(year, month - 1, date);
 		return cal.getTime();
 	}
 
-	public static Date toDate(int year, int month, int date, int hours, int minutes, int secs)
-	{
+	public static Date toDate(int year, int month, int date, int hours, int minutes, int secs) {
 		Calendar cal = Calendar.getInstance();
 		cal.clear();
 		cal.set(year, month - 1, date, hours, minutes, secs);
@@ -73,8 +66,7 @@ public class Dates
 	}
 
 	@Deprecated
-	public static Date toCalendar(java.sql.Date date)
-	{
+	public static Date toCalendar(java.sql.Date date) {
 		if (date == null) return null;
 		Calendar cal = Calendar.getInstance();
 		cal.clear();
@@ -83,8 +75,7 @@ public class Dates
 	}
 
 	@Deprecated
-	public static String toSqlDate(Date date)
-	{
+	public static String toSqlDate(Date date) {
 		Preconditions.checkNotNull(date);
 		DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 		return df.print(date.getTime());

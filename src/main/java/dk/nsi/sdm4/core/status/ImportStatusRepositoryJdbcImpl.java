@@ -113,14 +113,14 @@ public class ImportStatusRepositoryJdbcImpl implements ImportStatusRepository {
 		}
 	}
 
-    @Override
-    public boolean isDBAlive() {
-        try {
-            jdbcTemplate.queryForObject("Select max(id) from " + statusTableName, Long.class);
-        } catch(Exception someError) {
-	        logger.debug("Exception when trying to check database", someError);
-            return false;
-        }
-        return true;
-    }
+	@Override
+	public boolean isDBAlive() {
+		try {
+			jdbcTemplate.queryForObject("Select max(id) from " + statusTableName, Long.class);
+		} catch (Exception someError) {
+			logger.debug("Exception when trying to check database", someError);
+			return false;
+		}
+		return true;
+	}
 }

@@ -26,10 +26,8 @@ package dk.nsi.sdm4.core.parser;
 
 import static java.lang.String.format;
 
-public class OutOfSequenceException extends ParserException
-{
-    public OutOfSequenceException(String currentVersion, String newVersion)
-    {
-        super(format("Import out of sequence. current_version=%s, new_version=%s.", currentVersion, newVersion));
-    }
+public class OutOfSequenceException extends ParserException {
+	public OutOfSequenceException(String currentVersion, String newVersion) {
+		super(format("Import out of sequence. current_version=%s, new_version=%s.", currentVersion, newVersion));
+	}
 }
