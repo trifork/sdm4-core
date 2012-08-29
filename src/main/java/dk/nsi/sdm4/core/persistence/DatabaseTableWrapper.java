@@ -162,7 +162,11 @@ public class DatabaseTableWrapper<T extends TemporalEntity>
     public void insertEntity(TemporalEntity entity, Date transactionTime) throws Exception
     {
         applyParamsToInsertStatement(insertRecordStmt, entity, transactionTime, transactionTime);
-        insertRecordStmt.execute();
+	    try {
+		    insertRecordStmt.execute();
+	    } catch (SQLException e) {
+		    throw new RuntimeException("Unable to insert entity " + entity, e);
+	    }
     }
 
     public void insertAndUpdateRow(TemporalEntity entity, Date transactionTime) throws Exception
