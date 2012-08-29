@@ -50,7 +50,7 @@ public class AuditingPersister implements Persister {
 	@Autowired
 	DataSource dataSource;
 
-	public AuditingPersister() throws SQLException {
+	public AuditingPersister() {
 		this.transactionTime = new Date();
 	}
 
