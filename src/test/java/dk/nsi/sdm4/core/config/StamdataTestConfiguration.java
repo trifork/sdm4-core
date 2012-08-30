@@ -1,9 +1,9 @@
 package dk.nsi.sdm4.core.config;
 
 import dk.nsi.sdm4.core.parser.Inbox;
-import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserExecutor;
 import dk.nsi.sdm4.core.persistence.migration.DbMigrator;
+import dk.sdsd.nsp.slalog.api.SLALogger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -25,23 +25,12 @@ public class StamdataTestConfiguration extends StamdataConfiguration {
     }
 
     @Bean
-    public ParserExecutor parserExecutor() {
-        //ParserExecutor currently doesn't have a interface, and cannot be mocked
-        return null;
-    }
-
-    @Bean
     public DbMigrator dbMigrator() {
         return null;
     }
 
-    @Bean
-    public Inbox inbox() {
-        return mock(Inbox.class);
-    }
-
-	@Override
-	public Parser parser() {
-		return mock(Parser.class);
+	@Bean
+	public SLALogger slaLogger() {
+		return mock(SLALogger.class);
 	}
 }

@@ -9,6 +9,7 @@ import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.nsi.sdm4.core.status.ImportStatusRepositoryJdbcImpl;
 import dk.nsi.sdm4.core.status.TimeSource;
 import dk.nsi.sdm4.core.status.TimeSourceRealTimeImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -22,7 +23,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 
 /**
- * Configuration class extendended by the concrete subclasses in the parser modules
+ * Configuration class extendended by the concrete subclasses in the parser modules,
+ * providing the common infrastructure.
  */
 public abstract class StamdataConfiguration {
 	@Value("${sdm.dataDir}")
@@ -72,10 +74,10 @@ public abstract class StamdataConfiguration {
 	}
 
 	@Bean
-	public Inbox inbox() throws Exception {
+	public Inbox inbox(Parser parser) throws Exception {
 		return new DirectoryInbox(
 				dataDir,
-				parser().getHome());
+				parser.getHome());
 	}
 
 	@Bean
@@ -88,6 +90,4 @@ public abstract class StamdataConfiguration {
 	public TimeSource timeSource() {
 		return new TimeSourceRealTimeImpl();
 	}
-
-	public abstract Parser parser();
 }
