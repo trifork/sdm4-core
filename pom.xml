@@ -11,9 +11,9 @@
     </properties>
 
     <scm>
-        <url>scm:git:git://github.com/trifork/sdm4-core</url>
-        <connection>scm:git:git://github.com/trifork/sdm4-core.git</connection>
-        <developerConnection>scm:git:git://github.com/trifork/sdm4-core.git</developerConnection>
+        <url>scm:git:git@github.com:trifork/sdm4-core</url>
+        <connection>scm:git:git@github.com:trifork/sdm4-core.git</connection>
+        <developerConnection>scm:git:git@github.com:trifork/sdm4-core.git</developerConnection>
     </scm>
     <issueManagement>
         <system>JIRA</system>
