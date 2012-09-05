@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
 
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -82,8 +83,8 @@ public class RecordPersisterTest
     public void setUp() throws SQLException
     {
         recordSpecification = RecordSpecification.createSpecification("SikredeTest", "Moo",
-                RecordSpecification.field("Foo", 2).numerical(),
-                RecordSpecification.field("Moo", 5)
+                field("Foo", 2).numerical(),
+                field("Moo", 5)
         );
 
         createSikredeFieldsTableOnDatabase(recordSpecification);

@@ -37,6 +37,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
+
 public class RecordPersister {
 	private Instant transactionTime;
 
@@ -74,11 +77,11 @@ public class RecordPersister {
 		public void setValues(PreparedStatement preparedStatement) throws SQLException {
 			int index = 1;
 
-			for (RecordSpecification.FieldSpecification fieldSpecification : recordSpec.getFieldSpecs()) {
+			for (FieldSpecification fieldSpecification : recordSpec.getFieldSpecs()) {
 				if (fieldSpecification.persistField) {
-					if (fieldSpecification.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL) {
+					if (fieldSpecification.type == ALPHANUMERICAL) {
 						preparedStatement.setString(index, (String) record.get(fieldSpecification.name));
-					} else if (fieldSpecification.type == RecordSpecification.RecordFieldType.NUMERICAL) {
+					} else if (fieldSpecification.type == NUMERICAL) {
 						preparedStatement.setInt(index, (Integer) record.get(fieldSpecification.name));
 					} else {
 						throw new AssertionError("RecordType was not set correctly in the specification");
@@ -102,7 +105,7 @@ public class RecordPersister {
 		List<String> fieldNames = Lists.newArrayList();
 		List<String> questionMarks = Lists.newArrayList();
 
-		for (RecordSpecification.FieldSpecification fieldSpecification : specification.getFieldSpecs()) {
+		for (FieldSpecification fieldSpecification : specification.getFieldSpecs()) {
 			if (fieldSpecification.persistField) {
 				fieldNames.add(fieldSpecification.name);
 				questionMarks.add("?");

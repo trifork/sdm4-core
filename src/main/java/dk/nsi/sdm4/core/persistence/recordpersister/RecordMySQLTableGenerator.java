@@ -24,6 +24,9 @@
  */
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
+
 public class RecordMySQLTableGenerator {
 	public static String createSqlSchema(RecordSpecification recordSpecification) {
 		RecordMySQLTableGenerator creator = new RecordMySQLTableGenerator(recordSpecification);
@@ -43,11 +46,11 @@ public class RecordMySQLTableGenerator {
 
 		builder.append("\tPID BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY");
 
-		for (RecordSpecification.FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
+		for (FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
 			if (fieldSpecification.persistField) {
-				if (fieldSpecification.type == RecordSpecification.RecordFieldType.NUMERICAL) {
+				if (fieldSpecification.type == NUMERICAL) {
 					builder.append(String.format(",\n\t%s BIGINT", fieldSpecification.name));
-				} else if (fieldSpecification.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL) {
+				} else if (fieldSpecification.type == ALPHANUMERICAL) {
 					builder.append(String.format(",\n\t%s VARCHAR(%d)", fieldSpecification.name, fieldSpecification.length));
 				} else {
 					throw new AssertionError("Field specification must have a type.");

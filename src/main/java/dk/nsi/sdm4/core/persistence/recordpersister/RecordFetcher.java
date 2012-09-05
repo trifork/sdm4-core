@@ -34,6 +34,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
+
 
 public class RecordFetcher {
 	@Autowired
@@ -87,13 +90,13 @@ public class RecordFetcher {
 	private Record createRecordFromResultSet(RecordSpecification recordSpecification, SqlRowSet resultSet) throws SQLException {
 		RecordBuilder builder = new RecordBuilder(recordSpecification);
 
-		for (RecordSpecification.FieldSpecification fieldSpec : recordSpecification.getFieldSpecs()) {
+		for (FieldSpecification fieldSpec : recordSpecification.getFieldSpecs()) {
 			if (fieldSpec.persistField) {
 				String fieldName = fieldSpec.name;
 
-				if (fieldSpec.type == RecordSpecification.RecordFieldType.NUMERICAL) {
+				if (fieldSpec.type == NUMERICAL) {
 					builder.field(fieldName, resultSet.getInt(fieldName));
-				} else if (fieldSpec.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL) {
+				} else if (fieldSpec.type == ALPHANUMERICAL) {
 					builder.field(fieldName, resultSet.getString(fieldName));
 				} else {
 					throw new AssertionError("Invalid field specifier used");

@@ -43,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.SQLException;
 import java.util.List;
 
-import static dk.nsi.sdm4.core.persistence.recordpersister.RecordSpecification.field;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)

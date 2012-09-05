@@ -25,12 +25,13 @@
 package dk.nsi.sdm4.core.parser;
 
 import com.google.common.base.Preconditions;
+import dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification;
 import dk.nsi.sdm4.core.persistence.recordpersister.Record;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordBuilder;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordSpecification;
-import dk.nsi.sdm4.core.persistence.recordpersister.RecordSpecification.FieldSpecification;
-import dk.nsi.sdm4.core.persistence.recordpersister.RecordSpecification.RecordFieldType;
 
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 import static java.lang.String.format;
 
 public class SingleLineRecordParser {
@@ -52,9 +53,9 @@ public class SingleLineRecordParser {
         for (FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
             String subString = line.substring(offset, offset + fieldSpecification.length);
 
-            if (fieldSpecification.type == RecordFieldType.ALPHANUMERICAL) {
+            if (fieldSpecification.type == ALPHANUMERICAL) {
                 builder.field(fieldSpecification.name, subString.trim());
-            } else if (fieldSpecification.type == RecordFieldType.NUMERICAL) {
+            } else if (fieldSpecification.type == NUMERICAL) {
                 // This will potentially throw a runtime exception on bad input.
                 //
                 builder.field(fieldSpecification.name, Integer.parseInt(subString.trim()));

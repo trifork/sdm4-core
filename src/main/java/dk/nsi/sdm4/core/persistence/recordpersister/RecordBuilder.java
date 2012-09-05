@@ -26,6 +26,8 @@ package dk.nsi.sdm4.core.persistence.recordpersister;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 
 public class RecordBuilder {
 	private RecordSpecification recordSpecification;
@@ -47,14 +49,14 @@ public class RecordBuilder {
 	}
 
 	public RecordBuilder field(String fieldName, int value) {
-		return field(fieldName, value, RecordSpecification.RecordFieldType.NUMERICAL);
+		return field(fieldName, value, NUMERICAL);
 	}
 
 	public RecordBuilder field(String fieldName, String value) {
-		return field(fieldName, value, RecordSpecification.RecordFieldType.ALPHANUMERICAL);
+		return field(fieldName, value, ALPHANUMERICAL);
 	}
 
-	private RecordBuilder field(String fieldName, Object value, RecordSpecification.RecordFieldType recordFieldType) {
+	private RecordBuilder field(String fieldName, Object value, FieldSpecification.RecordFieldType recordFieldType) {
 		checkNotNull(fieldName);
 		checkArgument(value == null || getFieldType(fieldName) == recordFieldType, "Field " + fieldName + " is not " + recordFieldType);
 
@@ -72,11 +74,11 @@ public class RecordBuilder {
 	}
 
 	public Record addDummyFieldsAndBuild() {
-		for (RecordSpecification.FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
+		for (FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
 			if (!record.containsKey(fieldSpecification.name)) {
-				if (fieldSpecification.type == RecordSpecification.RecordFieldType.ALPHANUMERICAL) {
+				if (fieldSpecification.type == ALPHANUMERICAL) {
 					record = record.put(fieldSpecification.name, "D");
-				} else if (fieldSpecification.type == RecordSpecification.RecordFieldType.NUMERICAL) {
+				} else if (fieldSpecification.type == NUMERICAL) {
 					record = record.put(fieldSpecification.name, 0);
 				} else {
 					throw new AssertionError("");
@@ -86,8 +88,8 @@ public class RecordBuilder {
 		return build();
 	}
 
-	private RecordSpecification.RecordFieldType getFieldType(String fieldName) {
-		for (RecordSpecification.FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
+	private FieldSpecification.RecordFieldType getFieldType(String fieldName) {
+		for (FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
 			if (fieldSpecification.name.equals(fieldName)) {
 				return fieldSpecification.type;
 			}
