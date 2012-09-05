@@ -32,7 +32,7 @@ public class SingleLineRecordParserTest {
 	public void buildsARecordWithAnIntegerField() {
 		SingleLineRecordParser parser = makeParser(new FieldSpecification("testField", NUMERICAL, 2, true));
 		Record record = parser.parseLine("31");
-		assertEquals(31, record.get("testField"));
+		assertEquals(31L, record.get("testField"));
 	}
 
 	@Test
