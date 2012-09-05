@@ -38,17 +38,7 @@ public class RecordBuilder {
 		record = new Record();
 	}
 
-	public RecordBuilder field(String fieldName, Object value) {
-		if (value instanceof Integer) {
-			return field(fieldName, (Integer) value);
-		} else if (value instanceof String) {
-			return field(fieldName, (String) value);
-		} else {
-			throw new IllegalArgumentException("Values in records must be string or integer. field=" + fieldName);
-		}
-	}
-
-	public RecordBuilder field(String fieldName, int value) {
+	public RecordBuilder field(String fieldName, long value) {
 		return field(fieldName, value, NUMERICAL);
 	}
 
