@@ -108,7 +108,7 @@ public class RecordPersisterTest
 	    persisterIn2010.persist(recordB, recordSpecification);
 
         Record record = fetcher.fetchCurrent("Bar", recordSpecification);
-        assertThat((Integer) record.get("Foo"), is(23));
+        assertThat((Long) record.get("Foo"), is(23L));
     }
 
     @Test
