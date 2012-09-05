@@ -26,6 +26,7 @@ package dk.nsi.sdm4.core.persistence.recordpersister;
 
 import org.joda.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 
 
@@ -42,13 +44,19 @@ public class RecordFetcher {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	public Record fetchCurrent(String key, RecordSpecification recordSpecification, String lookupColumn) throws SQLException {
+	public Record fetchCurrent(String key, RecordSpecification recordSpecification, String lookupColumn) {
+		Record record = null;
 		SqlRowSet resultSet = jdbcTemplate.queryForRowSet(String.format("SELECT * FROM %s WHERE %s = ? AND validTo IS NULL", recordSpecification.getTable(), lookupColumn), key);
 		if (resultSet.next()) {
-			return createRecordFromResultSet(recordSpecification, resultSet);
-		} else {
-			return null;
+			record = createRecordFromResultSet(recordSpecification, resultSet);
+		} // else we will return null, which is what we want
+
+		if (!resultSet.isLast()) {
+			throw new IncorrectResultSizeDataAccessException("More than one record with validTo NULL was found", 1);
 		}
+
+		return record;
+
 	}
 
 	public Record fetchCurrent(String key, RecordSpecification recordSpecification) throws SQLException {
@@ -87,7 +95,7 @@ public class RecordFetcher {
 		return result;
 	}
 
-	private Record createRecordFromResultSet(RecordSpecification recordSpecification, SqlRowSet resultSet) throws SQLException {
+	private Record createRecordFromResultSet(RecordSpecification recordSpecification, SqlRowSet resultSet) {
 		RecordBuilder builder = new RecordBuilder(recordSpecification);
 
 		for (FieldSpecification fieldSpec : recordSpecification.getFieldSpecs()) {
@@ -95,11 +103,13 @@ public class RecordFetcher {
 				String fieldName = fieldSpec.name;
 
 				if (fieldSpec.type == NUMERICAL) {
-					builder.field(fieldName, resultSet.getInt(fieldName));
+					builder.field(fieldName, resultSet.getLong(fieldName));
+				} else if (fieldSpec.type == DECIMAL10_3) {
+					builder.field(fieldName, resultSet.getDouble(fieldName));
 				} else if (fieldSpec.type == ALPHANUMERICAL) {
 					builder.field(fieldName, resultSet.getString(fieldName));
 				} else {
-					throw new AssertionError("Invalid field specifier used");
+					throw new AssertionError("Invalid field specifier " + fieldSpec.type + " used");
 				}
 			}
 		}

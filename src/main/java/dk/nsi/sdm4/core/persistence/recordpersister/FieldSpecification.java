@@ -9,7 +9,8 @@ public class FieldSpecification {
 
 	public static enum RecordFieldType {
 		ALPHANUMERICAL,
-		NUMERICAL
+		NUMERICAL,
+		DECIMAL10_3
 	}
 
 	public FieldSpecification(String name, RecordFieldType type, int length, boolean persistField) {
@@ -33,6 +34,13 @@ public class FieldSpecification {
 		return new FieldSpecification(name, type, length, false);
 	}
 
+
+	/**
+	 * Returns a copy of the field with a decimal(10,3) entry
+	 */
+	public FieldSpecification decimal10_3() {
+		return new FieldSpecification(name, RecordFieldType.DECIMAL10_3, length, persistField);
+	}
 
 	/**
 	 * Creates an alphanumerical field that will be persisted

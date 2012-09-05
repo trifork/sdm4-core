@@ -32,6 +32,7 @@ import dk.nsi.sdm4.core.persistence.recordpersister.RecordSpecification;
 import org.apache.commons.lang.StringUtils;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 import static java.lang.String.format;
 
@@ -57,7 +58,12 @@ public class SingleLineRecordParser {
 	        String trimmedValue = subString.trim();
 	        if (fieldSpecification.type == ALPHANUMERICAL) {
                 builder.field(fieldSpecification.name, trimmedValue);
-            } else if (fieldSpecification.type == NUMERICAL) {
+	        } else if (fieldSpecification.type == DECIMAL10_3) {
+		        if (StringUtils.isEmpty(trimmedValue)) {
+			        throw new ParserException("Field " + fieldSpecification.name + " at offset " + offset + " in line " + line  + " has value '" + subString + "' which is not allowed for numerical fields");
+		        }
+		        builder.field(fieldSpecification.name, Double.parseDouble(trimmedValue));
+	        } else if (fieldSpecification.type == NUMERICAL) {
 		        if (StringUtils.isEmpty(trimmedValue) || !StringUtils.isNumeric(trimmedValue)) {
 			        throw new ParserException("Field " + fieldSpecification.name + " at offset " + offset + " in line " + line  + " has value '" + subString + "' which is not allowed for numerical fields");
 		        }

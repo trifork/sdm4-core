@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 
 public class RecordSpecification {
@@ -85,7 +86,7 @@ public class RecordSpecification {
 				} else {
 					Object value = record.get(fieldsSpecification.name);
 
-					if (fieldsSpecification.type == NUMERICAL) {
+					if (fieldsSpecification.type == NUMERICAL || fieldsSpecification.type == DECIMAL10_3) {
 						if (value != null && !(value instanceof Number)) {
 							return false;
 						}

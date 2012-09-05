@@ -82,11 +82,9 @@ public class RecordPersister {
 					if (fieldSpecification.type == ALPHANUMERICAL) {
 						preparedStatement.setString(index, (String) fieldVal);
 					} else if (fieldSpecification.type == FieldSpecification.RecordFieldType.NUMERICAL) {
-						if (fieldVal instanceof Integer) {
-							preparedStatement.setInt(index, (Integer) fieldVal);
-						} else if (fieldVal instanceof Long) {
-							preparedStatement.setLong(index, (Long) fieldVal);
-						}
+						preparedStatement.setLong(index, (Long) fieldVal);
+					} else if (fieldSpecification.type == FieldSpecification.RecordFieldType.DECIMAL10_3) {
+						preparedStatement.setDouble(index, (Double) fieldVal);
 					} else {
 						throw new AssertionError("RecordType was not set correctly in the specification");
 					}

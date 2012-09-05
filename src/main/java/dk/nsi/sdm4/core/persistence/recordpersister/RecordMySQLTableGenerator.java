@@ -25,6 +25,7 @@
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 
 public class RecordMySQLTableGenerator {
@@ -50,6 +51,8 @@ public class RecordMySQLTableGenerator {
 			if (fieldSpecification.persistField) {
 				if (fieldSpecification.type == NUMERICAL) {
 					builder.append(String.format(",\n\t%s BIGINT", fieldSpecification.name));
+				} else if (fieldSpecification.type == DECIMAL10_3) {
+					builder.append(String.format(",\n\t%s DECIMAL(10,3)", fieldSpecification.name));
 				} else if (fieldSpecification.type == ALPHANUMERICAL) {
 					builder.append(String.format(",\n\t%s VARCHAR(%d)", fieldSpecification.name, fieldSpecification.length));
 				} else {

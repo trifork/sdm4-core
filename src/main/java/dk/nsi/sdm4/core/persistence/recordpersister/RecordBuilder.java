@@ -27,6 +27,7 @@ package dk.nsi.sdm4.core.persistence.recordpersister;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 
 public class RecordBuilder {
@@ -40,6 +41,10 @@ public class RecordBuilder {
 
 	public RecordBuilder field(String fieldName, long value) {
 		return field(fieldName, value, NUMERICAL);
+	}
+
+	public RecordBuilder field(String fieldName, double value) {
+		return field(fieldName, value, DECIMAL10_3);
 	}
 
 	public RecordBuilder field(String fieldName, String value) {

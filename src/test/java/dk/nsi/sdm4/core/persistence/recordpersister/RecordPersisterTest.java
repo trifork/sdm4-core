@@ -52,7 +52,9 @@ import static org.junit.Assert.assertThat;
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class RecordPersisterTest
 {
-		@Configuration
+	private RecordSpecification decimalRecordSpec;
+
+	@Configuration
 		@PropertySource("classpath:test.properties")
 		@Import(RecordPersisterTestDatasourceConfiguration.class)
 		static class ContextConfiguration {
@@ -87,7 +89,12 @@ public class RecordPersisterTest
                 field("Moo", 5)
         );
 
-        createSikredeFieldsTableOnDatabase(recordSpecification);
+	    decimalRecordSpec = RecordSpecification.createSpecification("SikredeTestDecimal", "Moo",
+			    field("Foo", 2).decimal10_3(),
+			    field("Moo", 5)
+	    );
+
+	    createSikredeFieldsTableOnDatabase(recordSpecification);
     }
 
     @Test
@@ -107,7 +114,7 @@ public class RecordPersisterTest
 	    persisterIn2010.jdbcTemplate = jdbcTemplate;
 	    persisterIn2010.persist(recordB, recordSpecification);
 
-        Record record = fetcher.fetchCurrent("Bar", recordSpecification);
+        Record record = fetcher.fetchSince(recordSpecification, 0, theYear2010.minusDays(1).toInstant(), 1).get(0).getRecord();
         assertThat((Long) record.get("Foo"), is(23L));
     }
 
@@ -129,9 +136,22 @@ public class RecordPersisterTest
         assertEquals(recordA, recordAExpected);
     }
 
-    private void createSikredeFieldsTableOnDatabase(RecordSpecification recordSpecification) throws SQLException
+	@Test
+	public void testSaveDecimal10_3() throws SQLException
+	{
+		Record recordA = new RecordBuilder(decimalRecordSpec).field("Foo", 42.2).field("Moo", "Far").build();
+
+		persister.persist(recordA, decimalRecordSpec);
+
+		assertEquals(new Double(42.2), jdbcTemplate.queryForObject("SELECT Foo FROM " + decimalRecordSpec.getTable(), Double.class));
+	}
+
+	private void createSikredeFieldsTableOnDatabase(RecordSpecification recordSpecification) throws SQLException
     {
         jdbcTemplate.update("DROP TABLE IF EXISTS " + recordSpecification.getTable());
 	    jdbcTemplate.update(RecordMySQLTableGenerator.createSqlSchema(recordSpecification));
+
+	    jdbcTemplate.update("DROP TABLE IF EXISTS " + decimalRecordSpec.getTable());
+	    jdbcTemplate.update(RecordMySQLTableGenerator.createSqlSchema(decimalRecordSpec));
     }
 }
