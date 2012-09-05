@@ -86,7 +86,7 @@ public class RecordSpecification {
 					Object value = record.get(fieldsSpecification.name);
 
 					if (fieldsSpecification.type == NUMERICAL) {
-						if (!(value instanceof Integer)) {
+						if (value != null && !(value instanceof Number)) {
 							return false;
 						}
 					} else if (fieldsSpecification.type == ALPHANUMERICAL) {
