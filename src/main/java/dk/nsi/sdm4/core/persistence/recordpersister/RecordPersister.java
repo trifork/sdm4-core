@@ -38,7 +38,6 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 
 public class RecordPersister {
 	private Instant transactionTime;
@@ -79,10 +78,15 @@ public class RecordPersister {
 
 			for (FieldSpecification fieldSpecification : recordSpec.getFieldSpecs()) {
 				if (fieldSpecification.persistField) {
+					Object fieldVal = record.get(fieldSpecification.name);
 					if (fieldSpecification.type == ALPHANUMERICAL) {
-						preparedStatement.setString(index, (String) record.get(fieldSpecification.name));
-					} else if (fieldSpecification.type == NUMERICAL) {
-						preparedStatement.setInt(index, (Integer) record.get(fieldSpecification.name));
+						preparedStatement.setString(index, (String) fieldVal);
+					} else if (fieldSpecification.type == FieldSpecification.RecordFieldType.NUMERICAL) {
+						if (fieldVal instanceof Integer) {
+							preparedStatement.setInt(index, (Integer) fieldVal);
+						} else if (fieldVal instanceof Long) {
+							preparedStatement.setLong(index, (Long) fieldVal);
+						}
 					} else {
 						throw new AssertionError("RecordType was not set correctly in the specification");
 					}
