@@ -29,6 +29,7 @@ import dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification;
 import dk.nsi.sdm4.core.persistence.recordpersister.Record;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordBuilder;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordSpecification;
+import org.apache.commons.lang.StringUtils;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
@@ -53,12 +54,14 @@ public class SingleLineRecordParser {
         for (FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
             String subString = line.substring(offset, offset + fieldSpecification.length);
 
-            if (fieldSpecification.type == ALPHANUMERICAL) {
-                builder.field(fieldSpecification.name, subString.trim());
+	        String trimmedValue = subString.trim();
+	        if (fieldSpecification.type == ALPHANUMERICAL) {
+                builder.field(fieldSpecification.name, trimmedValue);
             } else if (fieldSpecification.type == NUMERICAL) {
-                // This will potentially throw a runtime exception on bad input.
-                //
-                builder.field(fieldSpecification.name, Integer.parseInt(subString.trim()));
+		        if (StringUtils.isEmpty(trimmedValue) || !StringUtils.isNumeric(trimmedValue)) {
+			        throw new ParserException("Field " + fieldSpecification.name + " at offset " + offset + " in line " + line  + " has value '" + subString + "' which is not allowed for numerical fields");
+		        }
+                builder.field(fieldSpecification.name, Long.parseLong(trimmedValue));
             } else {
                 throw new AssertionError("Should match exactly one of the types alphanumerical or numerical.");
             }
