@@ -69,4 +69,9 @@ public class Record {
 	public int hashCode() {
 		return map != null ? map.hashCode() : 0;
 	}
+
+	@Override
+	public String toString() {
+		return "Record[" + map.toString() + "]";
+	};
 }
