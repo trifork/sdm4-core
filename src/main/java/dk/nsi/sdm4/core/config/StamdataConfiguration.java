@@ -103,8 +103,10 @@ public abstract class StamdataConfiguration {
 		return new RecordPersister(Instant.now());
 	}
 
+	// This needs the static modifier due to https://jira.springsource.org/browse/SPR-8269. If not static, field jdbcJndiName
+	// will not be set when trying to instantiate the DataSource
 	@Bean
-	CustomScopeConfigurer scopeConfigurer() {
+	public static CustomScopeConfigurer scopeConfigurer() {
 		return new SimpleThreadScopeConfigurer();
 	}
 }
