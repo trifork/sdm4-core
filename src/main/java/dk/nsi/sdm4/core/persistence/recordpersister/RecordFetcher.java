@@ -56,7 +56,6 @@ public class RecordFetcher {
 		}
 
 		return record;
-
 	}
 
 	public Record fetchCurrent(String key, RecordSpecification recordSpecification) throws SQLException {

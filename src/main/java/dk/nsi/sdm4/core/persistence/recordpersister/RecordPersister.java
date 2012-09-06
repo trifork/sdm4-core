@@ -58,6 +58,10 @@ public class RecordPersister {
 		this.transactionTime = new Instant();
 	}
 
+	public Instant getTransactionTime() {
+		return transactionTime;
+	}
+
 	public void persist(Record record, RecordSpecification specification) throws SQLException {
 		Preconditions.checkNotNull(record);
 		Preconditions.checkNotNull(specification);

@@ -53,24 +53,26 @@ public class SingleLineRecordParser {
         int offset = 0;
 
         for (FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
-            String subString = line.substring(offset, offset + fieldSpecification.length);
+	        if (!fieldSpecification.ignored) {
+	            String subString = line.substring(offset, offset + fieldSpecification.length);
 
-	        String trimmedValue = subString.trim();
-	        if (fieldSpecification.type == ALPHANUMERICAL) {
-                builder.field(fieldSpecification.name, trimmedValue);
-	        } else if (fieldSpecification.type == DECIMAL10_3) {
-		        if (StringUtils.isEmpty(trimmedValue)) {
-			        throw new ParserException("Field " + fieldSpecification.name + " at offset " + offset + " in line " + line  + " has value '" + subString + "' which is not allowed for numerical fields");
-		        }
-		        builder.field(fieldSpecification.name, Double.parseDouble(trimmedValue));
-	        } else if (fieldSpecification.type == NUMERICAL) {
-		        if (StringUtils.isEmpty(trimmedValue) || !StringUtils.isNumeric(trimmedValue)) {
-			        throw new ParserException("Field " + fieldSpecification.name + " at offset " + offset + " in line " + line  + " has value '" + subString + "' which is not allowed for numerical fields");
-		        }
-                builder.field(fieldSpecification.name, Long.parseLong(trimmedValue));
-            } else {
-                throw new AssertionError("Should match exactly one of the types alphanumerical or numerical.");
-            }
+		        String trimmedValue = subString.trim();
+		        if (fieldSpecification.type == ALPHANUMERICAL) {
+	                builder.field(fieldSpecification.name, trimmedValue);
+		        } else if (fieldSpecification.type == DECIMAL10_3) {
+			        if (StringUtils.isEmpty(trimmedValue)) {
+				        throw new ParserException("Field " + fieldSpecification.name + " at offset " + offset + " in line " + line  + " has value '" + subString + "' which is not allowed for numerical fields");
+			        }
+			        builder.field(fieldSpecification.name, Double.parseDouble(trimmedValue));
+		        } else if (fieldSpecification.type == NUMERICAL) {
+			        if (StringUtils.isEmpty(trimmedValue) || !StringUtils.isNumeric(trimmedValue)) {
+				        throw new ParserException("Field " + fieldSpecification.name + " at offset " + offset + " in line " + line  + " has value '" + subString + "' which is not allowed for numerical fields");
+			        }
+	                builder.field(fieldSpecification.name, Long.parseLong(trimmedValue));
+	            } else {
+	                throw new AssertionError("Should match exactly one of the types alphanumerical or numerical.");
+	            }
+	        }
 
             offset += fieldSpecification.length;
         }

@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class SingleLineRecordParserTest {
 	@Test(expected = IllegalArgumentException.class)
@@ -30,7 +31,7 @@ public class SingleLineRecordParserTest {
 
 	@Test
 	public void buildsARecordWithNumericField() {
-		SingleLineRecordParser parser = makeParser(new FieldSpecification("testField", NUMERICAL, 2, true));
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 2).numerical());
 		Record record = parser.parseLine("31");
 		assertEquals(31L, record.get("testField"));
 	}
@@ -40,6 +41,13 @@ public class SingleLineRecordParserTest {
 		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 5), FieldSpecification.field("testField2", 12));
 		Record record = parser.parseLine("12345testFieldVal");
 		assertEquals("testFieldVal", record.get("testField2"));
+	}
+
+	@Test
+	public void ignoresIgnoredField() {
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 5).ignored());
+		Record record = parser.parseLine("12345");
+		assertNull(record.get("testField"));
 	}
 
 	private SingleLineRecordParser makeParser(FieldSpecification... fields) {
