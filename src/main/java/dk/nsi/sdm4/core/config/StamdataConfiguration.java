@@ -5,14 +5,20 @@ import dk.nsi.sdm4.core.parser.Inbox;
 import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserExecutor;
 import dk.nsi.sdm4.core.persistence.migration.DbMigrator;
+import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.nsi.sdm4.core.status.ImportStatusRepositoryJdbcImpl;
 import dk.nsi.sdm4.core.status.TimeSource;
 import dk.nsi.sdm4.core.status.TimeSourceRealTimeImpl;
+import org.joda.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,6 +27,7 @@ import org.springframework.jndi.JndiObjectFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 
 /**
  * Configuration class extendended by the concrete subclasses in the parser modules,
@@ -85,9 +92,19 @@ public abstract class StamdataConfiguration {
 		return new ImportStatusRepositoryJdbcImpl();
 	}
 
-
 	@Bean
 	public TimeSource timeSource() {
 		return new TimeSourceRealTimeImpl();
+	}
+
+	@Bean
+	@Scope(value="thread", proxyMode= ScopedProxyMode.TARGET_CLASS)
+	public RecordPersister persister() {
+		return new RecordPersister(Instant.now());
+	}
+
+	@Bean
+	CustomScopeConfigurer scopeConfigurer() {
+		return new SimpleThreadScopeConfigurer();
 	}
 }

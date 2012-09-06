@@ -1,5 +1,6 @@
 package dk.nsi.sdm4.core.parser;
 
+import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatus;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogger;
@@ -12,6 +13,7 @@ import org.mockito.InOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -47,6 +49,16 @@ public class ParserExecutorTest {
 		}
 
 		@Bean
+		public JdbcTemplate template() {
+			return mock(JdbcTemplate.class); // needed because the RecordPersister class is mocked, but still has its @Autowired fields
+		}
+
+		@Bean
+		public RecordPersister persister() {
+			return mock(RecordPersister.class);
+		}
+
+		@Bean
 		ImportStatusRepository importStatusRepository() {
 			ImportStatusRepository repo = mock(ImportStatusRepository.class);
 			return repo;
@@ -70,9 +82,12 @@ public class ParserExecutorTest {
 	@Autowired
 	ImportStatusRepository statusRepo;
 
+	@Autowired
+	RecordPersister persister;
+
 	@Before
 	public void resetMocks() {
-		reset(inbox, parser, statusRepo);
+		reset(inbox, parser, statusRepo, persister);
 	}
 
 	@Test
@@ -179,6 +194,16 @@ public class ParserExecutorTest {
 		verifyZeroInteractions(statusRepo);
 	}
 
+	@Test
+	public void shouldResetTheRecordPersisterBeforeRunningParser() throws IOException {
+		whenInboxIsNotLockedAndHasSomeFileInIt();
+
+		executor.run();
+
+		verify(persister).resetTransactionTime();
+		verify(parser).process(any(File.class));
+	}
+
 	private void whenInboxIsLocked() throws IOException {
 		when(inbox.isLocked()).thenReturn(true);
 		doThrow(new IllegalStateException("Inbox is locked")).when(inbox).top();
@@ -193,4 +218,5 @@ public class ParserExecutorTest {
 		whenInboxIsNotLocked();
 		when(inbox.top()).thenReturn(new File("dummyFile"));
 	}
+
 }

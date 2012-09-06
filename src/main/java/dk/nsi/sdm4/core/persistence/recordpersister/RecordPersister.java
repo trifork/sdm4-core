@@ -50,6 +50,13 @@ public class RecordPersister {
 		this.transactionTime = transactionTime;
 	}
 
+	public RecordPersister() {
+		resetTransactionTime();
+	}
+
+	public void resetTransactionTime() {
+		this.transactionTime = new Instant();
+	}
 
 	public void persist(Record record, RecordSpecification specification) throws SQLException {
 		Preconditions.checkNotNull(record);
