@@ -42,7 +42,6 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
 import static org.junit.Assert.assertEquals;
@@ -75,9 +74,6 @@ public class RecordFetcherTest {
 	private RecordSpecification decimalRecordSpec;
 
 	@Autowired
-	private Instant transactionTime;
-
-	@Autowired
 	private RecordPersister persister;
 
 	@Autowired
@@ -98,35 +94,7 @@ public class RecordFetcherTest {
 				field("Moo", 5)
 		);
 
-		createRecordFieldsTableOnDatabase(recordSpecification);
-	}
-
-	@Test
-	public void testCorrectOrderWhenSameModifiedDate() throws SQLException {
-		Record recordA = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
-		Record recordB = new RecordBuilder(recordSpecification).field("Foo", 23).field("Moo", "Bar").build();
-
-		persister.persist(recordA, recordSpecification);
-		persister.persist(recordB, recordSpecification);
-
-		List<RecordMetadata> result = fetcher.fetchSince(recordSpecification, 0L, transactionTime, 10);
-
-		assertEquals(2, result.size());
-		assertEquals(recordA, result.get(0).getRecord());
-		assertEquals(recordB, result.get(1).getRecord());
-	}
-
-	@Test
-	public void testCorrectOrderWhenSameModifiedDateButWithLimit() throws SQLException {
-		Record recordA = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
-		Record recordB = new RecordBuilder(recordSpecification).field("Foo", 23).field("Moo", "Bar").build();
-
-		persister.persist(recordA, recordSpecification);
-		persister.persist(recordB, recordSpecification);
-
-		List<RecordMetadata> result = fetcher.fetchSince(recordSpecification, 0L, transactionTime, 1);
-
-		assertEquals(1, result.size());
+		createRecordFieldsTableOnDatabase();
 	}
 
 	@Test(expected = IncorrectResultSizeDataAccessException.class)
@@ -150,22 +118,6 @@ public class RecordFetcherTest {
 	}
 
 	@Test
-	public void testCorrectOrderWhenSameModifiedDateUsingLimitTwoCalls() throws SQLException {
-		Record recordA = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
-		Record recordB = new RecordBuilder(recordSpecification).field("Foo", 23).field("Moo", "Bar").build();
-
-		persister.persist(recordA, recordSpecification);
-		persister.persist(recordB, recordSpecification);
-
-		List<RecordMetadata> result = fetcher.fetchSince(recordSpecification, 0L, transactionTime, 1);
-		Long newPID = result.get(0).getPid();
-
-		result = fetcher.fetchSince(recordSpecification, newPID, transactionTime, 1);
-		assertEquals(1, result.size());
-		assertEquals(recordB, result.get(0).getRecord());
-	}
-
-	@Test
 	public void testFetchDecimal10_3() throws SQLException
 	{
 		Record recordA = new RecordBuilder(decimalRecordSpec).field("Foo", 42.2).field("Moo", "Far").build();
@@ -176,67 +128,7 @@ public class RecordFetcherTest {
 		assertEquals(42.2, result.get("Foo"));
 	}
 
-	@Test
-	public void testLastRecordIsResentIfChanged() throws SQLException {
-		Record recordA = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
-		Record recordB = new RecordBuilder(recordSpecification).field("Foo", 23).field("Moo", "Bar").build();
-
-		Instant year1995 = new DateTime(1995, 1, 1, 0, 0).toInstant();
-		Instant year2000 = new DateTime(2000, 1, 1, 0, 0).toInstant();
-
-		RecordPersister persisterYear1995 = new RecordPersister(year1995);
-		persisterYear1995.jdbcTemplate = jdbcTemplate;
-		RecordPersister persisterYear2000 = new RecordPersister(year2000);
-		persisterYear2000.jdbcTemplate = jdbcTemplate;
-
-		persisterYear1995.persist(recordA, recordSpecification);
-		persisterYear1995.persist(recordB, recordSpecification);
-
-		List<RecordMetadata> result = fetcher.fetchSince(recordSpecification, 0L, year1995, 10);
-		assertEquals(2, result.size());
-		RecordMetadata lastRecordMetadata = result.get(1);
-
-		persisterYear2000.persist(recordB, recordSpecification);
-		result = fetcher.fetchSince(recordSpecification, lastRecordMetadata.getPid(), lastRecordMetadata.getModifiedDate(), 10);
-		assertEquals(1, result.size());
-		assertEquals(recordB, result.get(0).getRecord());
-	}
-
-	@Test
-	public void testAdvancedResend() throws SQLException {
-		Record recordA = new RecordBuilder(recordSpecification).field("Foo", 1).field("Moo", "Far").build();
-		Record recordB = new RecordBuilder(recordSpecification).field("Foo", 2).field("Moo", "Bar").build();
-		Record recordC = new RecordBuilder(recordSpecification).field("Foo", 3).field("Moo", "Start").build();
-		Record recordD = new RecordBuilder(recordSpecification).field("Foo", 4).field("Moo", "End").build();
-
-		Instant year1995 = new DateTime(1995, 1, 1, 0, 0).toInstant();
-		Instant year2000 = new DateTime(2000, 1, 1, 0, 0).toInstant();
-
-		RecordPersister persisterYear1995 = new RecordPersister(year1995);
-		persisterYear1995.jdbcTemplate = jdbcTemplate;
-		RecordPersister persisterYear2000 = new RecordPersister(year2000);
-		persisterYear2000.jdbcTemplate = jdbcTemplate;
-
-
-		persisterYear1995.persist(recordA, recordSpecification);
-		persisterYear1995.persist(recordB, recordSpecification);
-		persisterYear1995.persist(recordC, recordSpecification);
-
-		List<RecordMetadata> result = fetcher.fetchSince(recordSpecification, 0L, year1995, 10);
-		assertEquals(3, result.size());
-		RecordMetadata lastRecordMetadata = result.get(2);
-
-		persisterYear2000.persist(recordB, recordSpecification);
-		persisterYear2000.persist(recordC, recordSpecification);
-		persisterYear2000.persist(recordD, recordSpecification);
-		result = fetcher.fetchSince(recordSpecification, lastRecordMetadata.getPid(), lastRecordMetadata.getModifiedDate(), 10);
-		assertEquals(3, result.size());
-		assertEquals(recordB, result.get(0).getRecord());
-		assertEquals(recordC, result.get(1).getRecord());
-		assertEquals(recordD, result.get(2).getRecord());
-	}
-
-	private void createRecordFieldsTableOnDatabase(RecordSpecification recordSpecification) throws SQLException {
+	private void createRecordFieldsTableOnDatabase() throws SQLException {
 		jdbcTemplate.update("DROP TABLE IF EXISTS " + recordSpecification.getTable());
 		jdbcTemplate.update(RecordMySQLTableGenerator.createSqlSchema(recordSpecification));
 

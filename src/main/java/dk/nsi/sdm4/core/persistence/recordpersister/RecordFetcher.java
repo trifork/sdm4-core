@@ -24,21 +24,14 @@
  */
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
-import org.joda.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
-
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.*;
 
 public class RecordFetcher {
 	@Autowired
@@ -62,39 +55,13 @@ public class RecordFetcher {
 		return fetchCurrent(key, recordSpecification, recordSpecification.getKeyColumn());
 	}
 
-	public List<RecordMetadata> fetchSince(RecordSpecification recordSpecification, long fromPID, Instant fromModifiedDate, int limit) throws SQLException {
-		String queryString = String.format("SELECT * FROM %s WHERE " +
-				"(PID > ? AND ModifiedDate = ?) OR " +
-				"PID > ? OR " +
-				"(PID = ? AND ModifiedDate > ?) " +
-				"ORDER BY ModifiedDate, PID LIMIT %d", recordSpecification.getTable(), limit);
 
+    // Indtil 7/7-2012 var der her en fetchSince-metode. Den er fjernet, da dens semantik var uklar, og ingen parsere
+	// brugte den. Den antog at databasetabellen for en Record havde en kolonne PID, hvilket kun gælder for én parser
+	// blandt de nuværende.
+	// Når/hvis NSP-modulerne skal over på det nye core, må vi genindføre metoden med en mere veldefineret semantik.
 
-		Timestamp fromModifiedDateAsTimestamp = new Timestamp(fromModifiedDate.getMillis());
-
-		SqlRowSet resultSet = jdbcTemplate.queryForRowSet(queryString,
-				fromPID,
-				fromModifiedDateAsTimestamp,
-				fromPID,
-				fromPID,
-				fromModifiedDateAsTimestamp);
-
-
-		List<RecordMetadata> result = new ArrayList<RecordMetadata>();
-		while (resultSet.next()) {
-			Instant validFrom = new Instant(resultSet.getTimestamp("ValidFrom"));
-			Instant validTo = new Instant(resultSet.getTimestamp("ValidTo"));
-			Instant modifiedDate = new Instant(resultSet.getTimestamp("ModifiedDate"));
-			Long pid = (Long) resultSet.getObject("PID");
-			Record record = createRecordFromResultSet(recordSpecification, resultSet);
-			RecordMetadata recordMetadata = new RecordMetadata(validFrom, validTo, modifiedDate, pid, record);
-			result.add(recordMetadata);
-		}
-
-		return result;
-	}
-
-	private Record createRecordFromResultSet(RecordSpecification recordSpecification, SqlRowSet resultSet) {
+    private Record createRecordFromResultSet(RecordSpecification recordSpecification, SqlRowSet resultSet) {
 		RecordBuilder builder = new RecordBuilder(recordSpecification);
 
 		for (FieldSpecification fieldSpec : recordSpecification.getFieldSpecs()) {

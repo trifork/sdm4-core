@@ -114,8 +114,8 @@ public class RecordPersisterTest
 	    persisterIn2010.jdbcTemplate = jdbcTemplate;
 	    persisterIn2010.persist(recordB, recordSpecification);
 
-        Record record = fetcher.fetchSince(recordSpecification, 0, theYear2010.minusDays(1).toInstant(), 1).get(0).getRecord();
-        assertThat((Long) record.get("Foo"), is(23L));
+	    Long fooFromDb = jdbcTemplate.queryForLong("SELECT FOO from " + recordSpecification.getTable() + " WHERE ValidFrom > ?", theYear2010.minusDays(1).toDate());
+	    assertThat(fooFromDb, is(23L));
     }
 
     @Test
