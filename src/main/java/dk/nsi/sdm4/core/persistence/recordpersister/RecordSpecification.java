@@ -26,6 +26,7 @@ package dk.nsi.sdm4.core.persistence.recordpersister;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,5 +109,10 @@ public class RecordSpecification {
 		}
 
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return new ReflectionToStringBuilder(this).toString();
 	}
 }

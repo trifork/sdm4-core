@@ -1,5 +1,7 @@
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+
 public class FieldSpecification {
 	public final String name;
 	public final RecordFieldType type;
@@ -56,5 +58,10 @@ public class FieldSpecification {
 	 */
 	public static FieldSpecification field(String name, int length) {
 		return new FieldSpecification(name, RecordFieldType.ALPHANUMERICAL, length, true, false);
+	}
+
+	@Override
+	public String toString() {
+		return new ReflectionToStringBuilder(this).toString();
 	}
 }
