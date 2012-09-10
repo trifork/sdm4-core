@@ -45,6 +45,7 @@ import java.sql.SQLException;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -105,6 +106,11 @@ public class RecordFetcherTest {
 		persister.persist(recordA, recordSpecification);
 
 		fetcher.fetchCurrent("Far", recordSpecification);
+	}
+
+	@Test
+	public void returnsNullWhenNoRecordExists() throws SQLException {
+		assertNull(fetcher.fetchCurrent("Far", recordSpecification));
 	}
 
 	@Test

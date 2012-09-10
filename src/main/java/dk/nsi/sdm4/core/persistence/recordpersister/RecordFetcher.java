@@ -24,28 +24,40 @@
  */
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.*;
 
 public class RecordFetcher {
+	private static final Logger log = Logger.getLogger(RecordFetcher.class);
+
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
 	public Record fetchCurrent(String key, RecordSpecification recordSpecification, String lookupColumn) {
-		Record record = null;
-		SqlRowSet resultSet = jdbcTemplate.queryForRowSet(String.format("SELECT * FROM %s WHERE %s = ? AND validTo IS NULL", recordSpecification.getTable(), lookupColumn), key);
-		if (resultSet.next()) {
-			record = createRecordFromResultSet(recordSpecification, resultSet);
-		} // else we will return null, which is what we want
+		if (log.isDebugEnabled()) {
 
-		if (!resultSet.isLast()) {
-			throw new IncorrectResultSizeDataAccessException("More than one record with validTo NULL was found", 1);
+		}
+
+		String sql = String.format("SELECT * FROM %s WHERE %s = ? AND validTo IS NULL", recordSpecification.getTable(), lookupColumn);
+
+		Record record = null;
+		try {
+			record = jdbcTemplate.queryForObject(sql, new RecordRowsetMapper(recordSpecification), key);
+		} catch (EmptyResultDataAccessException e) {
+			// når der ingen åben record er, forventer klienter bare at vi returnerer null
+			return null;
+		}
+
+		if (log.isDebugEnabled()) {
+			log.debug("Fetch current for " + recordSpecification.getTable() + " " + lookupColumn + "=" + key + " returning " + record);
 		}
 
 		return record;
@@ -61,25 +73,38 @@ public class RecordFetcher {
 	// blandt de nuværende.
 	// Når/hvis NSP-modulerne skal over på det nye core, må vi genindføre metoden med en mere veldefineret semantik.
 
-    private Record createRecordFromResultSet(RecordSpecification recordSpecification, SqlRowSet resultSet) {
-		RecordBuilder builder = new RecordBuilder(recordSpecification);
+	private class RecordRowsetMapper implements RowMapper<Record> {
+		private RecordSpecification recordSpecification;
 
-		for (FieldSpecification fieldSpec : recordSpecification.getFieldSpecs()) {
-			if (fieldSpec.persistField) {
-				String fieldName = fieldSpec.name;
-
-				if (fieldSpec.type == NUMERICAL) {
-					builder.field(fieldName, resultSet.getLong(fieldName));
-				} else if (fieldSpec.type == DECIMAL10_3) {
-					builder.field(fieldName, resultSet.getDouble(fieldName));
-				} else if (fieldSpec.type == ALPHANUMERICAL) {
-					builder.field(fieldName, resultSet.getString(fieldName));
-				} else {
-					throw new AssertionError("Invalid field specifier " + fieldSpec.type + " used");
-				}
-			}
+		private RecordRowsetMapper(RecordSpecification recordSpecification) {
+			this.recordSpecification = recordSpecification;
 		}
 
-		return builder.build();
+		@Override
+		public Record mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+			RecordBuilder builder = new RecordBuilder(recordSpecification);
+
+			for (FieldSpecification fieldSpec : recordSpecification.getFieldSpecs()) {
+				if (log.isDebugEnabled()) {
+					log.debug("Processing field " + fieldSpec.name);
+				}
+
+				if (fieldSpec.persistField) {
+					String fieldName = fieldSpec.name;
+
+					if (fieldSpec.type == NUMERICAL) {
+						builder.field(fieldName, resultSet.getLong(fieldName));
+					} else if (fieldSpec.type == DECIMAL10_3) {
+						builder.field(fieldName, resultSet.getDouble(fieldName));
+					} else if (fieldSpec.type == ALPHANUMERICAL) {
+						builder.field(fieldName, resultSet.getString(fieldName));
+					} else {
+						throw new AssertionError("Invalid field specifier " + fieldSpec.type + " used");
+					}
+				}
+			}
+
+			return builder.build();
+		}
 	}
 }
