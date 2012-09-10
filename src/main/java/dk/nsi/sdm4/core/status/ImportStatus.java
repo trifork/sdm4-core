@@ -1,6 +1,7 @@
 package dk.nsi.sdm4.core.status;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 public class ImportStatus {
 	private DateTime startTime;
@@ -43,6 +44,7 @@ public class ImportStatus {
 
 		if (endTime != null) {
 			body += " and ended at: " + this.getEndTime();
+			body += ". Processing took " + new Duration(this.getStartTime(), this.getEndTime()).getStandardSeconds() + " seconds";
 		} else {
 			body += " and is still running";
 		}
