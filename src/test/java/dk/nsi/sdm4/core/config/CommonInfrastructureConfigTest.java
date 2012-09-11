@@ -1,24 +1,21 @@
 package dk.nsi.sdm4.core.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import javax.inject.Inject;
-
+import dk.nsi.sdm4.core.parser.Inbox;
+import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserExecutor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import dk.nsi.sdm4.core.parser.Inbox;
-import dk.nsi.sdm4.core.parser.Parser;
+import javax.inject.Inject;
+
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {CommonInfrastructureConfigTest.TestConfiguration.class})
