@@ -99,7 +99,7 @@ public abstract class StamdataConfiguration {
 
 	@Bean
 	@Scope(value="thread", proxyMode= ScopedProxyMode.TARGET_CLASS)
-	public RecordPersister persister() {
+	public RecordPersister recordPersister() {
 		return new RecordPersister(Instant.now());
 	}
 
