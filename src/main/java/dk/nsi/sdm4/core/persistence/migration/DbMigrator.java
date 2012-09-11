@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -20,7 +19,7 @@ import java.util.List;
 public class DbMigrator {
 	protected static final String METADATA_TABLE_NAME = "db_migrations";
 	private static final Logger log = Logger.getLogger(DbMigrator.class);
-	private static final String SCHEMA_SQL = "CREATE TABLE `db_migrations` (\n" +
+	private static final String SCHEMA_SQL = "CREATE TABLE IF NOT EXISTS `db_migrations` (\n" +
 			"  `version` varchar(20) NOT NULL,\n" +
 			"  `description` varchar(100) DEFAULT NULL,\n" +
 			"  `installed_by` varchar(30) NOT NULL,\n" +
@@ -36,9 +35,7 @@ public class DbMigrator {
 	protected MigrationFinder migrationFinder = new MigrationFinder();
 
 	public void migrate() {
-		if (!metadataTableExists()) {
-			createMetadataTable();
-		}
+		createMetadataTableIfNotExists();
 
 		doMigrations();
 
@@ -69,17 +66,9 @@ public class DbMigrator {
 		return 0 < jdbcTemplate.queryForInt("SELECT COUNT(*) FROM " + METADATA_TABLE_NAME + " WHERE version = ?", migration.getVersion());
 	}
 
-	private void createMetadataTable() {
+	private void createMetadataTableIfNotExists() {
+		// The SQL makes sure the table is only created if it doesn't exist
 		jdbcTemplate.update(SCHEMA_SQL);
-	}
-
-	private boolean metadataTableExists() {
-		return (Boolean) jdbcTemplate.execute(new ConnectionCallback() {
-			public Boolean doInConnection(Connection connection) throws SQLException, DataAccessException {
-				ResultSet resultSet = connection.getMetaData().getTables(getCurrentSchema(), null, METADATA_TABLE_NAME, null);
-				return resultSet.next();
-			}
-		});
 	}
 
 	private String getCurrentSchema() {
