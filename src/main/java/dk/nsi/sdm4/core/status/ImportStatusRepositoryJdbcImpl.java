@@ -48,7 +48,17 @@ public class ImportStatusRepositoryJdbcImpl implements ImportStatusRepository {
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
-	public void importEndedAt(DateTime endTime, ImportStatus.Outcome outcome) {
+	public void importEndedWithSuccess(DateTime endTime) {
+		importEndedAt(endTime, ImportStatus.Outcome.SUCCESS);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void importEndedWithFailure(DateTime endTime) {
+		importEndedAt(endTime, ImportStatus.Outcome.FAILURE);
+	}
+
+	private void importEndedAt(DateTime endTime, ImportStatus.Outcome outcome) {
 		Long newestOpenId;
 		try {
 			newestOpenId = jdbcTemplate.queryForLong("SELECT Id from " + statusTableName + " ORDER BY StartTime DESC LIMIT 1");

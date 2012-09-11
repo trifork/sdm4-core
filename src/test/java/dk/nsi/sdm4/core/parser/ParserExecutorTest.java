@@ -1,7 +1,6 @@
 package dk.nsi.sdm4.core.parser;
 
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
-import dk.nsi.sdm4.core.status.ImportStatus;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogger;
 import dk.sdsd.nsp.slalog.impl.SLALoggerDummyImpl;
@@ -152,7 +151,7 @@ public class ParserExecutorTest {
 		executor.run();
 
 		verify(statusRepo).importStartedAt(any(DateTime.class));
-		verify(statusRepo).importEndedAt(any(DateTime.class), eq(ImportStatus.Outcome.SUCCESS));
+		verify(statusRepo).importEndedWithSuccess(any(DateTime.class));
 	}
 
 	@Test
@@ -167,7 +166,7 @@ public class ParserExecutorTest {
 		}
 
 		verify(statusRepo).importStartedAt(any(DateTime.class));
-		verify(statusRepo).importEndedAt(any(DateTime.class), eq(ImportStatus.Outcome.FAILURE));
+		verify(statusRepo).importEndedWithFailure(any(DateTime.class));
 	}
 
 	@Test

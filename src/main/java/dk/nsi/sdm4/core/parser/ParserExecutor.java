@@ -60,7 +60,7 @@ public class ParserExecutor {
 					slaLogItem.setCallResultOk();
 					slaLogItem.store();
 
-					importStatusRepo.importEndedAt(new DateTime(), ImportStatus.Outcome.SUCCESS);
+					importStatusRepo.importEndedWithSuccess(new DateTime());
 				} // if there is no data and no error, we never call store on the log item, which is okay
 			} else {
 				if (logger.isDebugEnabled()) {
@@ -77,7 +77,7 @@ public class ParserExecutor {
 			slaLogItem.setCallResultError("Parser " + parserIdentifier + " failed - Cause: " + e.getMessage());
 			slaLogItem.store();
 
-			importStatusRepo.importEndedAt(new DateTime(), ImportStatus.Outcome.FAILURE);
+			importStatusRepo.importEndedWithFailure(new DateTime());
 
 			throw new RuntimeException("runParserOnInbox on parser " + parserIdentifier + " failed", e); // to make sure the transaction rolls back
 		}

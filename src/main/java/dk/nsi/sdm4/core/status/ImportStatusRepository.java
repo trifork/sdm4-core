@@ -8,15 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
  * Represents the import status and deadline information for a single parser
  */
 public interface ImportStatusRepository {
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	void importStartedAt(DateTime startTime);
-
-	@Transactional(propagation = Propagation.MANDATORY)
-	void importEndedAt(DateTime endTime, ImportStatus.Outcome outcome);
 
 	ImportStatus getLatestStatus();
 
 	boolean isOverdue();
 
 	boolean isDBAlive();
+
+	void importEndedWithSuccess(DateTime endTime);
+
+	void importEndedWithFailure(DateTime endTime);
 }

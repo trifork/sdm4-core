@@ -2,19 +2,14 @@ package dk.nsi.sdm4.core.status;
 
 import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserException;
-import dk.nsi.sdm4.core.status.ImportStatus;
-import dk.nsi.sdm4.core.status.ImportStatusRepositoryJdbcImpl;
-
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -117,7 +112,7 @@ public class ImportStatusRepositoryJdbcImplTest {
 	@Test
 	public void callingEndedAtWithAnEmptyDatabaseDoesNothing() {
 		// this can happen in the ParserExecutor, if some exception occurs before we reach the call to importStartedAt
-		repository.importEndedAt(new DateTime(), ImportStatus.Outcome.FAILURE);
+		repository.importEndedWithFailure(new DateTime());
 		assertNull(repository.getLatestStatus());
 	}
 
@@ -166,7 +161,7 @@ public class ImportStatusRepositoryJdbcImplTest {
 		DateTime startTimeNewest = new DateTime();
 		repository.importStartedAt(startTimeNewest);
 
-		repository.importEndedAt(new DateTime(), ImportStatus.Outcome.FAILURE);
+		repository.importEndedWithFailure(new DateTime());
 
 		// check that the newest was closed
 		ImportStatus dbStatus = repository.getLatestStatus();
@@ -219,7 +214,13 @@ public class ImportStatusRepositoryJdbcImplTest {
 		DateTime startTime = new DateTime();
 		repository.importStartedAt(startTime);
 		DateTime endTime = new DateTime();
-		repository.importEndedAt(endTime, outcome);
+
+		if (outcome == ImportStatus.Outcome.SUCCESS) {
+			repository.importEndedWithSuccess(endTime);
+		} else {
+			repository.importEndedWithFailure(endTime);
+		}
+
 		ImportStatus expectedStatus = new ImportStatus();
 		expectedStatus.setStartTime(startTime);
 		expectedStatus.setEndTime(endTime);
