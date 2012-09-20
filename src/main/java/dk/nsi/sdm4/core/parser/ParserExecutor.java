@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 
+/**
+ * Ansvarlig for at foretage jævnlige kørsler af én importer samt at skaffe den inddata.
+ */
 public class ParserExecutor {
 	@Autowired
 	Parser parser;
@@ -32,6 +35,10 @@ public class ParserExecutor {
 
 	@Scheduled(fixedDelay = 1000)
 	@Transactional
+	/**
+	 * Metode, der når inbox ikke er låst og indeholder et dataset, kalder sin importer.
+	 * Håndterer SLA-logning for hele importen og etablerer en transaktion, importer kører i.
+	 */
 	public void run() {
 		String parserIdentifier = parser.getHome();
 		SLALogItem slaLogItem = slaLogger.createLogItem("ParserExecutor", "Executing parser " + parserIdentifier);
