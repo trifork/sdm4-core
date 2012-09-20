@@ -1,7 +1,6 @@
 package dk.nsi.sdm4.core.parser;
 
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
-import dk.nsi.sdm4.core.status.ImportStatus;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogItem;
 import dk.sdsd.nsp.slalog.api.SLALogger;
