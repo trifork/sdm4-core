@@ -163,11 +163,18 @@ public class DirectoryInbox implements Inbox, InitializingBean {
 
 
 		if (logger.isDebugEnabled()) {
-			StringBuilder sb = new StringBuilder();
-			for (File file : directories) {
-				sb.append(file.getName() + ", ");
+			String directoriesString = "";
+			if (directories.length > 0) {
+				StringBuilder sb = new StringBuilder();
+				for (File file : directories) {
+					sb.append(file.getName() + ", ");
+				}
+				directoriesString = ", directories=" + sb.toString();
+			} else {
+				directoriesString = ", empty";
 			}
-			logger.debug("InboxPath=" + inboxDirectory.getAbsolutePath() + ", directories=" + sb.toString());
+
+			logger.debug("InboxPath=" + inboxDirectory.getAbsolutePath() + directoriesString);
 		}
 
 
