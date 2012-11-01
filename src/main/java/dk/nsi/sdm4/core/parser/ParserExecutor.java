@@ -58,7 +58,7 @@ public class ParserExecutor {
 					parser.process(dataSet);
 
 					// Once the import is complete
-					// we can remove of the data set
+					// we can remove the data set
 					// from the inbox.
 					inbox.advance();
 
