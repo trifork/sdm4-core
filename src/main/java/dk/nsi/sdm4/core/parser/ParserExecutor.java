@@ -90,6 +90,11 @@ public class ParserExecutor {
 	}
 
 	private void logDatasetContents(File dataSet) {
-		logger.info("Begin processing of dataset, datasetDir=" + dataSet.getAbsoluteFile());
+		StringBuilder message = new StringBuilder("Begin processing of dataset, datasetDir=").append(dataSet.getAbsoluteFile());
+		for (File file : dataSet.listFiles()) {
+			message.append(", file=").append(file.getAbsolutePath());
+		}
+
+		logger.info(message.toString());
 	}
 }

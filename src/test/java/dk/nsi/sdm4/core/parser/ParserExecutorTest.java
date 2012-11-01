@@ -7,7 +7,9 @@ import dk.sdsd.nsp.slalog.impl.SLALoggerDummyImpl;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -29,6 +31,9 @@ import static org.mockito.Matchers.any;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class ParserExecutorTest {
+	@Rule
+	public TemporaryFolder tmpDir = new TemporaryFolder();
+
 	@Configuration
 	static class TestConfiguration {
 		@Bean
@@ -204,12 +209,16 @@ public class ParserExecutorTest {
 	}
 
 	@Test
-	public void logsTheDatasetFilenameAndContentsBeforeHandingItToTheParser() throws Exception {
+	public void shouldLogTheDatasetFilenameAndContentsBeforeHandingItToTheParser() throws Exception {
 		Logger logger = Mockito.mock(Logger.class);
 		ParserExecutor.logger = logger;
 
 		whenInboxIsNotLocked();
-		Mockito.when(inbox.top()).thenReturn(new File("datasetFilename"));
+		File dataset = tmpDir.newFolder("datasetFilename");
+		File file1 = createFile(dataset, "file1");
+		File file2 = createFile(dataset, "file2");
+
+		Mockito.when(inbox.top()).thenReturn(dataset);
 
 		executor.run();
 
@@ -217,7 +226,17 @@ public class ParserExecutorTest {
 		Mockito.verify(logger).info(captor.capture());
 		String loggedMsg = captor.getValue();
 
-		assertTrue("logs dataset filename", loggedMsg.contains("datasetFilename"));
+		assertTrue("logs dataset path", loggedMsg.contains(dataset.getAbsolutePath()));
+		assertTrue("logs file1 path", loggedMsg.contains(file1.getAbsolutePath()));
+		assertTrue("logs file2 path", loggedMsg.contains(file2.getAbsolutePath()));
+
+	}
+
+	private File createFile(File parent, String name) throws IOException {
+		File file = new File(parent, name);
+		assertTrue(file.createNewFile());
+
+		return file;
 	}
 
 	private void whenInboxIsLocked() throws IOException {
