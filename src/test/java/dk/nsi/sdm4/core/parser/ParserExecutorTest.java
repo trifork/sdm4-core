@@ -4,11 +4,14 @@ import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogger;
 import dk.sdsd.nsp.slalog.impl.SLALoggerDummyImpl;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,10 +23,8 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
@@ -38,29 +39,28 @@ public class ParserExecutorTest {
 
 		@Bean
 		public Inbox inbox() {
-			return mock(Inbox.class);
+			return Mockito.mock(Inbox.class);
 		}
 
 
 		@Bean
 		public Parser parser() {
-			return mock(Parser.class);
+			return Mockito.mock(Parser.class);
 		}
 
 		@Bean
 		public JdbcTemplate template() {
-			return mock(JdbcTemplate.class); // needed because the RecordPersister class is mocked, but still has its @Autowired fields
+			return Mockito.mock(JdbcTemplate.class); // needed because the RecordPersister class is mocked, but still has its @Autowired fields
 		}
 
 		@Bean
 		public RecordPersister persister() {
-			return mock(RecordPersister.class);
+			return Mockito.mock(RecordPersister.class);
 		}
 
 		@Bean
 		ImportStatusRepository importStatusRepository() {
-			ImportStatusRepository repo = mock(ImportStatusRepository.class);
-			return repo;
+			return Mockito.mock(ImportStatusRepository.class);
 		}
 
 		@Bean
@@ -86,7 +86,7 @@ public class ParserExecutorTest {
 
 	@Before
 	public void resetMocks() {
-		reset(inbox, parser, statusRepo, persister);
+		Mockito.reset(inbox, parser, statusRepo, persister);
 	}
 
 	@Test
@@ -98,13 +98,13 @@ public class ParserExecutorTest {
 	@Test
 	public void shouldLockAParserIfItFails() throws Exception {
 		whenInboxIsNotLockedAndHasSomeFileInIt();
-		doThrow(new RuntimeException()).when(parser).process(any(File.class));
+		Mockito.doThrow(new RuntimeException()).when(parser).process(any(File.class));
 
 		try {
 			executor.run();
 		} catch (Exception ignore) {
 			// we expect the executor to throw an exception in this case
-			verify(inbox).lock();
+			Mockito.verify(inbox).lock();
 			return;
 		}
 
@@ -117,7 +117,7 @@ public class ParserExecutorTest {
 
 		executor.run();
 
-		verify(parser, times(0)).process(any(File.class));
+		Mockito.verify(parser, Mockito.times(0)).process(any(File.class));
 	}
 
 	@Test
@@ -126,7 +126,7 @@ public class ParserExecutorTest {
 
 		executor.run();
 
-		InOrder inOrder = inOrder(inbox);
+		InOrder inOrder = Mockito.inOrder(inbox);
 
 		inOrder.verify(inbox).update();
 		inOrder.verify(inbox).top();
@@ -138,7 +138,7 @@ public class ParserExecutorTest {
 
 		executor.run();
 
-		InOrder inOrder = inOrder(parser, inbox);
+		InOrder inOrder = Mockito.inOrder(parser, inbox);
 
 		inOrder.verify(parser).process(any(File.class));
 		inOrder.verify(inbox).advance();
@@ -150,14 +150,14 @@ public class ParserExecutorTest {
 
 		executor.run();
 
-		verify(statusRepo).importStartedAt(any(DateTime.class));
-		verify(statusRepo).importEndedWithSuccess(any(DateTime.class));
+		Mockito.verify(statusRepo).importStartedAt(any(DateTime.class));
+		Mockito.verify(statusRepo).importEndedWithSuccess(any(DateTime.class));
 	}
 
 	@Test
 	public void shouldSetErrorStatusIfTheParserThrowsException() throws Exception {
 		whenInboxIsNotLockedAndHasSomeFileInIt();
-		doThrow(new RuntimeException("parser cannot parse")).when(parser).process(any(File.class));
+		Mockito.doThrow(new RuntimeException("parser cannot parse")).when(parser).process(any(File.class));
 
 		try {
 			executor.run();
@@ -165,15 +165,15 @@ public class ParserExecutorTest {
 			// we expect the parser's exception to be rethrown
 		}
 
-		verify(statusRepo).importStartedAt(any(DateTime.class));
-		verify(statusRepo).importEndedWithFailure(any(DateTime.class));
+		Mockito.verify(statusRepo).importStartedAt(any(DateTime.class));
+		Mockito.verify(statusRepo).importEndedWithFailure(any(DateTime.class));
 	}
 
 	@Test
 	public void shouldRethrowIfTheParserThrowsException() throws Exception {
 		whenInboxIsNotLockedAndHasSomeFileInIt();
 		RuntimeException parserException = new RuntimeException("parser cannot parse");
-		doThrow(parserException).when(parser).process(any(File.class));
+		Mockito.doThrow(parserException).when(parser).process(any(File.class));
 
 		try {
 			executor.run();
@@ -186,11 +186,11 @@ public class ParserExecutorTest {
 
 	@Test
 	public void shouldNotSetTheLatestRunTimestampIfItDidNotRun() throws Exception {
-		when(inbox.top()).thenReturn(null);
+		Mockito.when(inbox.top()).thenReturn(null);
 
 		executor.run();
 
-		verifyZeroInteractions(statusRepo);
+		Mockito.verifyZeroInteractions(statusRepo);
 	}
 
 	@Test
@@ -199,23 +199,39 @@ public class ParserExecutorTest {
 
 		executor.run();
 
-		verify(persister).resetTransactionTime();
-		verify(parser).process(any(File.class));
+		Mockito.verify(persister).resetTransactionTime();
+		Mockito.verify(parser).process(any(File.class));
+	}
+
+	@Test
+	public void logsTheDatasetFilenameAndContentsBeforeHandingItToTheParser() throws Exception {
+		Logger logger = Mockito.mock(Logger.class);
+		ParserExecutor.logger = logger;
+
+		whenInboxIsNotLocked();
+		Mockito.when(inbox.top()).thenReturn(new File("datasetFilename"));
+
+		executor.run();
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(logger).info(captor.capture());
+		String loggedMsg = captor.getValue();
+
+		assertTrue("logs dataset filename", loggedMsg.contains("datasetFilename"));
 	}
 
 	private void whenInboxIsLocked() throws IOException {
-		when(inbox.isLocked()).thenReturn(true);
-		doThrow(new IllegalStateException("Inbox is locked")).when(inbox).top();
-		doThrow(new IllegalStateException("Inbox is locked")).when(inbox).update();
+		Mockito.when(inbox.isLocked()).thenReturn(true);
+		Mockito.doThrow(new IllegalStateException("Inbox is locked")).when(inbox).top();
+		Mockito.doThrow(new IllegalStateException("Inbox is locked")).when(inbox).update();
 	}
 
 	private void whenInboxIsNotLocked() throws IOException {
-		when(inbox.isLocked()).thenReturn(false);
+		Mockito.when(inbox.isLocked()).thenReturn(false);
 	}
 
 	private void whenInboxIsNotLockedAndHasSomeFileInIt() throws IOException {
 		whenInboxIsNotLocked();
-		when(inbox.top()).thenReturn(new File("dummyFile"));
+		Mockito.when(inbox.top()).thenReturn(new File("dummyFile"));
 	}
-
 }

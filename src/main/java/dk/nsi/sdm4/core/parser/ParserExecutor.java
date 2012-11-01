@@ -31,7 +31,7 @@ public class ParserExecutor {
 	@Autowired
 	private SLALogger slaLogger;
 
-	private static final Logger logger = Logger.getLogger(ParserExecutor.class);
+	protected static Logger logger = Logger.getLogger(ParserExecutor.class); // we need to be able to test the logging behaviour, therefore this field is not private and not final
 
 	@Scheduled(fixedDelay = 1000)
 	@Transactional
@@ -53,6 +53,7 @@ public class ParserExecutor {
 				File dataSet = inbox.top();
 
 				if (dataSet != null) {
+					logDatasetContents(dataSet);
 					recordPersister.resetTransactionTime();
 					importStatusRepo.importStartedAt(new DateTime());
 					parser.process(dataSet);
@@ -61,7 +62,6 @@ public class ParserExecutor {
 					// we can remove the data set
 					// from the inbox.
 					inbox.advance();
-
 
 					slaLogItem.setCallResultOk();
 					slaLogItem.store();
@@ -87,5 +87,9 @@ public class ParserExecutor {
 
 			throw new RuntimeException("runParserOnInbox on parser " + parserIdentifier + " failed", e); // to make sure the transaction rolls back
 		}
+	}
+
+	private void logDatasetContents(File dataSet) {
+		logger.info("Begin processing of dataset, datasetDir=" + dataSet.getAbsoluteFile());
 	}
 }
