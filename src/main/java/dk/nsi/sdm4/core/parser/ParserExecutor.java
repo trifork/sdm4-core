@@ -4,6 +4,8 @@ import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogItem;
 import dk.sdsd.nsp.slalog.api.SLALogger;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Ansvarlig for at foretage jævnlige kørsler af én importer samt at skaffe den inddata.
@@ -93,8 +96,17 @@ public class ParserExecutor {
 		StringBuilder message = new StringBuilder("Begin processing of dataset, datasetDir=").append(dataSet.getAbsoluteFile());
 		for (File file : dataSet.listFiles()) {
 			message.append(", file=").append(file.getAbsolutePath());
+			message.append(", md5=").append(DigestUtils.md5Hex(readFile(file)));
 		}
 
 		logger.info(message.toString());
+	}
+
+	private byte[] readFile(File file) {
+		try {
+			return FileUtils.readFileToByteArray(file);
+		} catch (IOException e) {
+			throw new ParserException("Unable to read file " + file.getAbsolutePath());
+		}
 	}
 }

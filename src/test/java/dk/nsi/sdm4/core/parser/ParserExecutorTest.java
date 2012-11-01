@@ -23,6 +23,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
@@ -229,12 +230,18 @@ public class ParserExecutorTest {
 		assertTrue("logs dataset path", loggedMsg.contains(dataset.getAbsolutePath()));
 		assertTrue("logs file1 path", loggedMsg.contains(file1.getAbsolutePath()));
 		assertTrue("logs file2 path", loggedMsg.contains(file2.getAbsolutePath()));
-
+		assertTrue("logs md5 hash", loggedMsg.contains("md5=250fd79a4936f66847582a144baf5492")); // we know from md5 in a shell that this is the md5 sum
+		// our two files has the same md5 hash, so we just assert once
 	}
 
+	/** creates af file with contents with a known hash of 250fd79a4936f66847582a144baf5492 **/
 	private File createFile(File parent, String name) throws IOException {
 		File file = new File(parent, name);
 		assertTrue(file.createNewFile());
+
+		FileWriter writer = new FileWriter(file);
+		writer.write("thisIsJustTheFileContents");
+		writer.close();
 
 		return file;
 	}
