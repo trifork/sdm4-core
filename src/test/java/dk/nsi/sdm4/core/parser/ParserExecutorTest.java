@@ -28,6 +28,8 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
@@ -258,6 +260,10 @@ public class ParserExecutorTest {
 
 	private void whenInboxIsNotLockedAndHasSomeFileInIt() throws IOException {
 		whenInboxIsNotLocked();
-		Mockito.when(inbox.top()).thenReturn(new File("dummyFile"));
+
+		File dataset = tmpDir.newFolder("datasetFilename");
+		createFile(dataset, "dummyFile");
+
+		Mockito.when(inbox.top()).thenReturn(dataset);
 	}
 }
