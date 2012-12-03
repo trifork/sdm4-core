@@ -64,7 +64,7 @@ public class ParserExecutorTimestampsTest {
 		public Parser fakeParser() {
 			return new Parser() {
 				public final int NUMBER_OF_RECORDS_TO_CREATE = 2;
-				public final RecordSpecification RECORD_SPECIFICATION = RecordSpecification.createSpecification("ParserExecutorTimestampsTest", "Column1", FieldSpecification.field("Column1", 1));
+				public final RecordSpecification RECORD_SPECIFICATION = RecordSpecification.createSpecification("ParserExecutorTimestampsTest", "Column1", FieldSpecification.field("Column1", 1, false));
 
 				@Override
 				public void process(File dataSet) throws ParserException {

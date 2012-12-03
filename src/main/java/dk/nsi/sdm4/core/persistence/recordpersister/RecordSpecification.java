@@ -82,23 +82,29 @@ public class RecordSpecification {
 
 		for (FieldSpecification fieldsSpecification : fields) {
 			if (fieldsSpecification.persistField) {
-				if (!record.containsKey(fieldsSpecification.name)) {
+				if (!record.containsKey(fieldsSpecification.name) && !fieldsSpecification.isOptional()) {
 					return false;
 				} else {
 					Object value = record.get(fieldsSpecification.name);
 
 					if (fieldsSpecification.type == NUMERICAL || fieldsSpecification.type == DECIMAL10_3) {
-						if (value != null && !(value instanceof Number)) {
+						if(value == null && fieldsSpecification.isOptional()) {
+							// ok, field is optional
+						} else if (value != null && !(value instanceof Number)) {
 							return false;
 						}
 					} else if (fieldsSpecification.type == ALPHANUMERICAL) {
-						if (value != null && !(value instanceof String)) {
-							return false;
-						} else if (value != null) {
-							String valueAsString = String.valueOf(value);
-
-							if (valueAsString.length() > fieldsSpecification.length) {
+						if(value == null && fieldsSpecification.isOptional()) {
+							// ok, field is optional
+						} else {
+							if (value != null && !(value instanceof String)) {
 								return false;
+							} else if (value != null) {
+								String valueAsString = String.valueOf(value);
+
+								if (valueAsString.length() > fieldsSpecification.length) {
+									return false;
+								}
 							}
 						}
 					} else {

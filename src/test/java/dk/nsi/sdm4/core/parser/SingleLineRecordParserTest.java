@@ -12,40 +12,40 @@ import static org.junit.Assert.assertNull;
 public class SingleLineRecordParserTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void complainsWhenLineIsTooLong() {
-		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 2));
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 2, false));
 		parser.parseLine("123");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void complainsWhenLineIsTooShort() {
-		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 2));
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 2, false));
 		parser.parseLine("1");
 	}
 
 	@Test
 	public void buildsARecordWithOneField() {
-		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 12));
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 12, false));
 		Record record = parser.parseLine("testFieldVal");
 		assertEquals("testFieldVal", record.get("testField"));
 	}
 
 	@Test
 	public void buildsARecordWithNumericField() {
-		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 2).numerical());
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 2, false).numerical());
 		Record record = parser.parseLine("31");
 		assertEquals(31L, record.get("testField"));
 	}
 
 	@Test
 	public void parsesSecondFieldOfRecord() {
-		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 5), FieldSpecification.field("testField2", 12));
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 5, false), FieldSpecification.field("testField2", 12, false));
 		Record record = parser.parseLine("12345testFieldVal");
 		assertEquals("testFieldVal", record.get("testField2"));
 	}
 
 	@Test
 	public void ignoresIgnoredField() {
-		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 5).ignored());
+		SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 5, false).ignored());
 		Record record = parser.parseLine("12345");
 		assertNull(record.get("testField"));
 	}

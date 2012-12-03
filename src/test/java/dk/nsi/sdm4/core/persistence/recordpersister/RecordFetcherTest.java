@@ -24,6 +24,12 @@
  */
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.sql.SQLException;
+
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.junit.Before;
@@ -40,12 +46,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.SQLException;
-
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -86,13 +86,13 @@ public class RecordFetcherTest {
 	@Before
 	public void setup() throws SQLException {
 		decimalRecordSpec = RecordSpecification.createSpecification("SikredeTestDecimal", "Moo",
-				field("Foo", 2).decimal10_3(),
-				field("Moo", 5)
+				field("Foo", 2, false).decimal10_3(),
+				field("Moo", 5, false)
 		);
 
 		recordSpecification = RecordSpecification.createSpecification("SikredeTest", "Moo",
-				field("Foo", 2).numerical(),
-				field("Moo", 5)
+				field("Foo", 2, false).numerical(),
+				field("Moo", 5, false)
 		);
 
 		createRecordFieldsTableOnDatabase();

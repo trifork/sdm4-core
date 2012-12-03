@@ -85,13 +85,13 @@ public class RecordPersisterTest
     public void setUp() throws SQLException
     {
         recordSpecification = RecordSpecification.createSpecification("SikredeTest", "Moo",
-                field("Foo", 2).numerical(),
-                field("Moo", 5)
+                field("Foo", 2, false).numerical(),
+                field("Moo", 5, false)
         );
 
 	    decimalRecordSpec = RecordSpecification.createSpecification("SikredeTestDecimal", "Moo",
-			    field("Foo", 2).decimal10_3(),
-			    field("Moo", 5)
+			    field("Foo", 2, false).decimal10_3(),
+			    field("Moo", 5, false)
 	    );
 
 	    createSikredeFieldsTableOnDatabase(recordSpecification);
