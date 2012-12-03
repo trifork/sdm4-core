@@ -4,6 +4,8 @@ import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogItem;
 import dk.sdsd.nsp.slalog.api.SLALogger;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Ansvarlig for at foretage jævnlige kørsler af én importer samt at skaffe den inddata.
@@ -31,7 +34,7 @@ public class ParserExecutor {
 	@Autowired
 	private SLALogger slaLogger;
 
-	private static final Logger logger = Logger.getLogger(ParserExecutor.class);
+	protected static Logger logger = Logger.getLogger(ParserExecutor.class); // we need to be able to test the logging behaviour, therefore this field is not private and not final
 
 	@Scheduled(fixedDelay = 1000)
 	@Transactional
@@ -53,15 +56,15 @@ public class ParserExecutor {
 				File dataSet = inbox.top();
 
 				if (dataSet != null) {
+					logDatasetContents(dataSet);
 					recordPersister.resetTransactionTime();
 					importStatusRepo.importStartedAt(new DateTime());
 					parser.process(dataSet);
 
 					// Once the import is complete
-					// we can remove of the data set
+					// we can remove the data set
 					// from the inbox.
 					inbox.advance();
-
 
 					slaLogItem.setCallResultOk();
 					slaLogItem.store();
@@ -86,6 +89,24 @@ public class ParserExecutor {
 			importStatusRepo.importEndedWithFailure(new DateTime());
 
 			throw new RuntimeException("runParserOnInbox on parser " + parserIdentifier + " failed", e); // to make sure the transaction rolls back
+		}
+	}
+
+	private void logDatasetContents(File dataSet) {
+		StringBuilder message = new StringBuilder("Begin processing of dataset, datasetDir=").append(dataSet.getAbsoluteFile());
+		for (File file : dataSet.listFiles()) {
+			message.append(", file=").append(file.getAbsolutePath());
+			message.append(", md5=").append(DigestUtils.md5Hex(readFile(file)));
+		}
+
+		logger.info(message.toString());
+	}
+
+	private byte[] readFile(File file) {
+		try {
+			return FileUtils.readFileToByteArray(file);
+		} catch (IOException e) {
+			throw new ParserException("Unable to read file " + file.getAbsolutePath());
 		}
 	}
 }

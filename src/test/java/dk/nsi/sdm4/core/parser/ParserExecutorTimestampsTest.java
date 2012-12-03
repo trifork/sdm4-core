@@ -6,8 +6,11 @@ import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogger;
 import dk.sdsd.nsp.slalog.impl.SLALoggerDummyImpl;
 import org.joda.time.Instant;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.*;
@@ -23,10 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +44,8 @@ import static org.mockito.Mockito.when;
 @Transactional
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class ParserExecutorTimestampsTest {
+	@Rule
+	public TemporaryFolder tmpDir = new TemporaryFolder();
 
 	@Configuration
 	@PropertySource("classpath:test.properties")
@@ -169,9 +176,19 @@ public class ParserExecutorTimestampsTest {
 		assertEquals(2, jdbcTemplate.queryForInt("SELECT COUNT (DISTINCT ValidFrom) from ParserExecutorTimestampsTest"));
 	}
 
-
 	private void whenInboxIsNotLockedAndHasSomeFileInIt() throws IOException {
 		when(inbox.isLocked()).thenReturn(false);
-		when(inbox.top()).thenReturn(new File("dummyFile"));
+
+		File dataset = tmpDir.newFolder("datasetFilename");
+		createFile(dataset, "dummyFile");
+
+		Mockito.when(inbox.top()).thenReturn(dataset);
+	}
+
+	private File createFile(File parent, String name) throws IOException {
+		File file = new File(parent, name);
+		assertTrue(file.createNewFile());
+
+		return file;
 	}
 }
