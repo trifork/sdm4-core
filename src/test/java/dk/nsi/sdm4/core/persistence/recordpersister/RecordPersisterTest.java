@@ -41,11 +41,11 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -59,15 +59,19 @@ public class RecordPersisterTest
 		@Import(RecordPersisterTestDatasourceConfiguration.class)
 		static class ContextConfiguration {
 			@Bean
-			public RecordFetcher recordFetcher() {
-				return new RecordFetcher();
+			public RecordFetcher recordFetcher(Instant transactionTime) {
+				return new RecordFetcher(transactionTime);
 			}
 
 			@Bean
-			public RecordPersister persister() {
-				Instant transactionTime = new DateTime(2011, 5, 29, 0, 0, 0).toInstant();
+			public RecordPersister persister(Instant transactionTime) {
 				return new RecordPersister(transactionTime);
 			}
+
+            @Bean
+            public Instant transactionTime() {
+                return new DateTime(2011, 5, 29, 0, 0, 0).toInstant();
+            }
 		}
 
     private RecordSpecification recordSpecification;
@@ -114,7 +118,7 @@ public class RecordPersisterTest
 	    persisterIn2010.jdbcTemplate = jdbcTemplate;
 	    persisterIn2010.persist(recordB, recordSpecification);
 
-	    Long fooFromDb = jdbcTemplate.queryForLong("SELECT FOO from " + recordSpecification.getTable() + " WHERE ValidFrom > ?", theYear2010.minusDays(1).toDate());
+	    Long fooFromDb = jdbcTemplate.queryForLong("SELECT FOO FROM " + recordSpecification.getTable() + " WHERE ValidFrom > ?", theYear2010.minusDays(1).toDate());
 	    assertThat(fooFromDb, is(23L));
     }
 
@@ -127,7 +131,7 @@ public class RecordPersisterTest
         persister.persist(recordA, recordSpecification);
         persister.persist(recordB, recordSpecification);
 
-	    assertEquals(2, jdbcTemplate.queryForInt("SELECT Count(*) FROM " + recordSpecification.getTable() + " WHERE validTo IS NULL"));
+	    assertEquals(2, jdbcTemplate.queryForInt("SELECT COUNT(*) FROM " + recordSpecification.getTable() + " WHERE validTo IS NULL"));
 
         Record recordAExpected = fetcher.fetchCurrent("Far", recordSpecification);
         Record recordBExpected = fetcher.fetchCurrent("Bar", recordSpecification);
@@ -145,6 +149,48 @@ public class RecordPersisterTest
 
 		assertEquals(new Double(42.2), jdbcTemplate.queryForObject("SELECT Foo FROM " + decimalRecordSpec.getTable(), Double.class));
 	}
+
+    @Test
+    public void testTerminateRecord() throws SQLException {
+        Record record = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
+        persister.persist(record, recordSpecification);
+
+        Record recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
+        // Make sure ValidTo is set to null
+        Timestamp timestamp = extractValidToFromRecord(record, recordSpecification);
+        assertNull("ValidTo should be null at this point", timestamp);
+
+        persister.terminate(recordFetced, recordSpecification);
+        timestamp = extractValidToFromRecord(record, recordSpecification);
+        assertNotNull("ValidTo should be set, since the record has been terminated", timestamp);
+    }
+
+    @Test
+    public void testTerminateRecordAt() throws SQLException {
+        Record record = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
+        persister.persist(record, recordSpecification);
+
+        Record recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
+        DateTime futureTime = new DateTime(2050, 1, 1, 0, 0, 0);
+        persister.terminateAt(recordFetced, recordSpecification, futureTime.toDate());
+
+        recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
+        Timestamp futureStamp = extractValidToFromRecord(recordFetced, recordSpecification);
+        assertTrue(futureStamp.compareTo(futureTime.toDate()) == 0);
+
+        DateTime closerFutureTime = new DateTime(2040, 1, 1, 0, 0, 0);
+        persister.terminateAt(recordFetced, recordSpecification, closerFutureTime.toDate());
+        recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
+        Timestamp closerFutureStamp = extractValidToFromRecord(recordFetced, recordSpecification);
+        assertTrue(closerFutureStamp.compareTo(closerFutureTime.toDate()) == 0);
+    }
+
+    private Timestamp extractValidToFromRecord(Record record, RecordSpecification specification) {
+        String keyColumn = specification.getKeyColumn();
+        String sql = "SELECT ValidTo FROM " + specification.getTable() + " WHERE " + keyColumn + "=?";
+        Object keyValue = record.get(keyColumn);
+        return jdbcTemplate.queryForObject(sql, Timestamp.class, (String)keyValue);
+    }
 
 	private void createSikredeFieldsTableOnDatabase(RecordSpecification recordSpecification) throws SQLException
     {

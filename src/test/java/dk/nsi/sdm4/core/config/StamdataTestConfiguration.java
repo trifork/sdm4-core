@@ -1,7 +1,5 @@
 package dk.nsi.sdm4.core.config;
 
-import dk.nsi.sdm4.core.parser.Inbox;
-import dk.nsi.sdm4.core.parser.ParserExecutor;
 import dk.nsi.sdm4.core.persistence.migration.DbMigrator;
 import dk.sdsd.nsp.slalog.api.SLALogger;
 import org.springframework.context.annotation.Bean;

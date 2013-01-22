@@ -6,7 +6,13 @@ target
 .classpath
 .project
 
+# Idea #
+###########
+.idea/
+*.iml
+
 # Mac #
 ###########
 .DS_Store
+
 

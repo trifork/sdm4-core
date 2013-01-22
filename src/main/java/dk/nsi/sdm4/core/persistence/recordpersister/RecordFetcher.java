@@ -25,6 +25,7 @@
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
 import org.apache.log4j.Logger;
+import org.joda.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,25 +33,42 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.*;
 
 public class RecordFetcher {
 	private static final Logger log = Logger.getLogger(RecordFetcher.class);
+    private Instant transactionTime;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	public Record fetchCurrent(String key, RecordSpecification recordSpecification, String lookupColumn) {
-		if (log.isDebugEnabled()) {
+    @Autowired
+    public RecordFetcher(Instant transactionTime) {
+        this.transactionTime = transactionTime;
+    }
 
-		}
+    public RecordFetcher() {
+        resetTransactionTime();
+    }
 
-		String sql = String.format("SELECT * FROM %s WHERE %s = ? AND validTo IS NULL", recordSpecification.getTable(), lookupColumn);
+    public void resetTransactionTime() {
+        this.transactionTime = new Instant();
+    }
 
-		Record record = null;
+	public Record fetchCurrent(String key, RecordSpecification recordSpecification,
+                               String lookupColumn) {
+        // KPN ValidTo does not have to be null as long as it is in the future it is ok
+        //             futhermore ValidFrom should be checked here aswell
+		String sql = String.format("SELECT * FROM %s WHERE %s = ? AND (validTo IS NULL OR validTo > ?) AND (validFrom <= ?)" ,
+                recordSpecification.getTable(), lookupColumn);
+
+		Record record;
 		try {
-			record = jdbcTemplate.queryForObject(sql, new RecordRowsetMapper(recordSpecification), key);
+            Timestamp validAtStamp = new Timestamp(transactionTime.getMillis());
+            record = jdbcTemplate.queryForObject(sql,
+                    new RecordRowsetMapper(recordSpecification), key, validAtStamp, validAtStamp);
 		} catch (EmptyResultDataAccessException e) {
 			// når der ingen åben record er, forventer klienter bare at vi returnerer null
 			return null;
@@ -68,10 +86,14 @@ public class RecordFetcher {
 	}
 
 
+
     // Indtil 7/7-2012 var der her en fetchSince-metode. Den er fjernet, da dens semantik var uklar, og ingen parsere
 	// brugte den. Den antog at databasetabellen for en Record havde en kolonne PID, hvilket kun gælder for én parser
 	// blandt de nuværende.
 	// Når/hvis NSP-modulerne skal over på det nye core, må vi genindføre metoden med en mere veldefineret semantik.
+
+    // TODO: KPN Not sure I agree fetchsince is used by the batch copy service, so it should be recreated if the service
+    // should run on sdm4 at some point...
 
 	private class RecordRowsetMapper implements RowMapper<Record> {
 		private RecordSpecification recordSpecification;

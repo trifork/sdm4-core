@@ -26,9 +26,11 @@ package dk.nsi.sdm4.core.persistence.recordpersister;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
@@ -56,8 +58,8 @@ public class RecordFetcherTest {
 	@Import(RecordPersisterTestDatasourceConfiguration.class)
 	static class ContextConfiguration {
 		@Bean
-		public RecordFetcher recordFetcher() {
-			return new RecordFetcher();
+		public RecordFetcher recordFetcher(Instant transactionTime) {
+			return new RecordFetcher(transactionTime);
 		}
 
 		@Bean
@@ -134,7 +136,16 @@ public class RecordFetcherTest {
 		assertEquals(42.2, result.get("Foo"));
 	}
 
-	private void createRecordFieldsTableOnDatabase() throws SQLException {
+    @Test
+    public void testFetchingInvalidRecord() throws SQLException {
+        Record recordA = new RecordBuilder(decimalRecordSpec).field("Foo", 42.2).field("Moo", "Far").build();
+        persister.persist(recordA, decimalRecordSpec);
+        persister.terminate(recordA, decimalRecordSpec);
+        // We just terminated a records so it should not be returned here
+        assertNull(fetcher.fetchCurrent("Far", decimalRecordSpec));
+    }
+
+    private void createRecordFieldsTableOnDatabase() throws SQLException {
 		jdbcTemplate.update("DROP TABLE IF EXISTS " + recordSpecification.getTable());
 		jdbcTemplate.update(RecordMySQLTableGenerator.createSqlSchema(recordSpecification));
 
