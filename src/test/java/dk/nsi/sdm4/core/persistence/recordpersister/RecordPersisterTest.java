@@ -41,7 +41,6 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.field;
 import static org.hamcrest.Matchers.is;
@@ -151,45 +150,29 @@ public class RecordPersisterTest
 	}
 
     @Test
-    public void testTerminateRecord() throws SQLException {
-        Record record = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
-        persister.persist(record, recordSpecification);
-
-        Record recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
-        // Make sure ValidTo is set to null
-        Timestamp timestamp = extractValidToFromRecord(record, recordSpecification);
-        assertNull("ValidTo should be null at this point", timestamp);
-
-        persister.terminate(recordFetced, recordSpecification);
-        timestamp = extractValidToFromRecord(record, recordSpecification);
-        assertNotNull("ValidTo should be set, since the record has been terminated", timestamp);
+    public void testPersistWithMeta() throws SQLException {
+        Record record = new RecordBuilder(decimalRecordSpec).field("Foo", 42.2).field("Moo", "Far").build();
+        // public RecordWithMetadata(Instant validFrom, Instant validTo, Instant modifiedDate, Long pid, Record record) {
+        Instant validFrom = new DateTime(2012, 1, 1, 1, 1, 1).toInstant();
+        Instant validTo = new DateTime(2013, 1, 1, 1, 1, 1).toInstant();
+        RecordWithMetadata recordWithMeta = new RecordWithMetadata(validFrom, validTo, null, null, record);
+        recordWithMeta = persister.persist(recordWithMeta, decimalRecordSpec);
+        assertNotNull(recordWithMeta.getPid());
+        assertNotNull(recordWithMeta.getModifiedDate());
+        assertEquals(recordWithMeta.getValidTo(), validTo);
+        assertEquals(recordWithMeta.getValidFrom(), validFrom);
     }
 
     @Test
-    public void testTerminateRecordAt() throws SQLException {
-        Record record = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", "Far").build();
-        persister.persist(record, recordSpecification);
+    public void testUpdateRecord() throws SQLException {
+        Record recordA = new RecordBuilder(decimalRecordSpec).field("Foo", 42.2).field("Moo", "Far").build();
+        persister.persist(recordA, decimalRecordSpec);
+        assertEquals(new Double(42.2), jdbcTemplate.queryForObject("SELECT Foo FROM " + decimalRecordSpec.getTable(), Double.class));
 
-        Record recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
-        DateTime futureTime = new DateTime(2050, 1, 1, 0, 0, 0);
-        persister.terminateAt(recordFetced, recordSpecification, futureTime.toDate());
-
-        recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
-        Timestamp futureStamp = extractValidToFromRecord(recordFetced, recordSpecification);
-        assertTrue(futureStamp.compareTo(futureTime.toDate()) == 0);
-
-        DateTime closerFutureTime = new DateTime(2040, 1, 1, 0, 0, 0);
-        persister.terminateAt(recordFetced, recordSpecification, closerFutureTime.toDate());
-        recordFetced = fetcher.fetchCurrent("Far", recordSpecification);
-        Timestamp closerFutureStamp = extractValidToFromRecord(recordFetced, recordSpecification);
-        assertTrue(closerFutureStamp.compareTo(closerFutureTime.toDate()) == 0);
-    }
-
-    private Timestamp extractValidToFromRecord(Record record, RecordSpecification specification) {
-        String keyColumn = specification.getKeyColumn();
-        String sql = "SELECT ValidTo FROM " + specification.getTable() + " WHERE " + keyColumn + "=?";
-        Object keyValue = record.get(keyColumn);
-        return jdbcTemplate.queryForObject(sql, Timestamp.class, (String)keyValue);
+        RecordWithMetadata recordWithMetadata = fetcher.fetchCurrentWithMeta("Far", decimalRecordSpec);
+        recordWithMetadata.getRecord().put("Foo", 88.8);
+        persister.update(recordWithMetadata, decimalRecordSpec);
+        assertEquals(new Double(88.8), jdbcTemplate.queryForObject("SELECT Foo FROM " + decimalRecordSpec.getTable(), Double.class));
     }
 
 	private void createSikredeFieldsTableOnDatabase(RecordSpecification recordSpecification) throws SQLException

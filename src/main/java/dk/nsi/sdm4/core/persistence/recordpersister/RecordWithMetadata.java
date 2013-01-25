@@ -26,21 +26,14 @@ package dk.nsi.sdm4.core.persistence.recordpersister;
 
 import org.joda.time.Instant;
 
-/**
- * Created by IntelliJ IDEA.
- * User: borlum
- * Date: 11/17/11
- * Time: 2:48 PM
- * To change this template use File | Settings | File Templates.
- */
-public class RecordMetadata {
-	private final Instant validFrom;
-	private final Instant validTo;
+public class RecordWithMetadata {
+	private Instant validFrom;
+	private Instant validTo;
 	private final Instant modifiedDate;
 	private final Long pid;
-	private final Record record;
+	private Record record;
 
-	public RecordMetadata(Instant validFrom, Instant validTo, Instant modifiedDate, Long pid, Record record) {
+	public RecordWithMetadata(Instant validFrom, Instant validTo, Instant modifiedDate, Long pid, Record record) {
 		this.validFrom = validFrom;
 		this.validTo = validTo;
 		this.modifiedDate = modifiedDate;
@@ -67,4 +60,16 @@ public class RecordMetadata {
 	public Record getRecord() {
 		return record;
 	}
+
+    public void setValidFrom(Instant validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public void setValidTo(Instant validTo) {
+        this.validTo = validTo;
+    }
+
+    public void setRecord(Record record) {
+        this.record = record;
+    }
 }

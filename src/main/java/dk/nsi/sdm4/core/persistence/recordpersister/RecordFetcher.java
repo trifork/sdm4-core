@@ -85,7 +85,42 @@ public class RecordFetcher {
 		return fetchCurrent(key, recordSpecification, recordSpecification.getKeyColumn());
 	}
 
+    /**
+     * Fetch currently valid record including metadata
+     * @param key
+     * @param recordSpecification
+     * @return
+     */
+    public RecordWithMetadata fetchCurrentWithMeta(String key, RecordSpecification recordSpecification) {
+        return fetchWithMetaAt(key, transactionTime, recordSpecification);
+    }
 
+    /**
+     * Fetch a record including metadata that was valid at a specific time.
+     * @param key
+     * @param validAt
+     * @param recordSpecification
+     * @return
+     */
+    public RecordWithMetadata fetchWithMetaAt(String key, Instant validAt, RecordSpecification recordSpecification) {
+        String keyColumn = recordSpecification.getKeyColumn();
+        String queryString = String.format("SELECT * FROM %s WHERE %s=? " +
+                "AND ValidFrom <= ? AND (ValidTo IS NULL OR ValidTo > ?) ", recordSpecification.getTable(), keyColumn);
+
+        RecordWithMetadata recordWithMeta;
+        try {
+            Timestamp validAtStamp = new Timestamp(validAt.getMillis());
+            recordWithMeta = jdbcTemplate.queryForObject(queryString,
+                    new RecordMetaRowsetMapper(recordSpecification), key, validAtStamp, validAtStamp);
+        } catch (EmptyResultDataAccessException e) {
+            // når der ingen åben recordWithMeta er, forventer klienter bare at vi returnerer null
+            return null;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Fetch current for " + recordSpecification.getTable() + " " + keyColumn + "=" + key + " returning " + recordWithMeta);
+        }
+        return recordWithMeta;
+    }
 
     // Indtil 7/7-2012 var der her en fetchSince-metode. Den er fjernet, da dens semantik var uklar, og ingen parsere
 	// brugte den. Den antog at databasetabellen for en Record havde en kolonne PID, hvilket kun gælder for én parser
@@ -129,4 +164,23 @@ public class RecordFetcher {
 			return builder.build();
 		}
 	}
+
+    private class RecordMetaRowsetMapper implements RowMapper<RecordWithMetadata> {
+
+        private RecordRowsetMapper recordMapper;
+
+        public RecordMetaRowsetMapper(RecordSpecification recordSpecification) {
+            recordMapper = new RecordRowsetMapper(recordSpecification);
+        }
+
+        @Override
+        public RecordWithMetadata mapRow(ResultSet resultSet, int i) throws SQLException {
+            Instant modifiedDate = new Instant(resultSet.getTimestamp("ModifiedDate"));
+            Instant validTo = new Instant(resultSet.getTimestamp("ValidTo"));
+            Instant validFrom = new Instant(resultSet.getTimestamp("ValidFrom"));
+            Long pid = (Long) resultSet.getObject("PID");
+            Record record = recordMapper.mapRow(resultSet, i);
+            return new RecordWithMetadata(validFrom, validTo, modifiedDate, pid, record);
+        }
+    }
 }

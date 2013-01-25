@@ -30,7 +30,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
@@ -137,12 +136,14 @@ public class RecordFetcherTest {
 	}
 
     @Test
-    public void testFetchingInvalidRecord() throws SQLException {
+    public void testUpdateRecord() throws SQLException {
+        RecordWithMetadata recordWithMeta = fetcher.fetchCurrentWithMeta("Far", decimalRecordSpec);
+        assertNull(recordWithMeta);
         Record recordA = new RecordBuilder(decimalRecordSpec).field("Foo", 42.2).field("Moo", "Far").build();
         persister.persist(recordA, decimalRecordSpec);
-        persister.terminate(recordA, decimalRecordSpec);
-        // We just terminated a records so it should not be returned here
-        assertNull(fetcher.fetchCurrent("Far", decimalRecordSpec));
+
+        recordWithMeta = fetcher.fetchCurrentWithMeta("Far", decimalRecordSpec);
+        assertNotNull(recordWithMeta);
     }
 
     private void createRecordFieldsTableOnDatabase() throws SQLException {

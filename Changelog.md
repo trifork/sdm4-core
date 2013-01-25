@@ -5,5 +5,6 @@
 *  NSPSUPPORT-126: ParserExecutor logger filers absolutte stier og md5-summer inden parser behandler dem
 
 ## sdm-core 4.4
-*  Udvidet RecordPersister så records kan termineres
-*  Udvidet RecordFetcher så den tjekker om records er 'valid in time' og ikke kun om ValidTo er null
+*  Flyttet RecordSettere til deres egen pakke
+*  Udvidet RecordPersister så records kan opdateres
+*  Udvidet RecordFetcher så den kan hente Records med metadata
