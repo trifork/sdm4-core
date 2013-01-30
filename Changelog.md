@@ -8,3 +8,10 @@
 *  Flyttet RecordSettere til deres egen pakke
 *  Udvidet RecordPersister så records kan opdateres
 *  Udvidet RecordFetcher så den kan hente Records med metadata
+Use 4.5 instead
+
+## sdm-core 4.5
+*  Make sure persister and fetcher always have the exact same transaction time
+*  Allow insertion of null values in fields
+!! Make sure to test properly if upgrading to this version, fetcher fetchcurrent has more conditions added
+   however it should make no different in the components using it is inserting correct validFrom.

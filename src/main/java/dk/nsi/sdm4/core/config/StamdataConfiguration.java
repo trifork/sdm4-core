@@ -98,13 +98,13 @@ public abstract class StamdataConfiguration {
 	@Bean
 	@Scope(value="thread", proxyMode=ScopedProxyMode.TARGET_CLASS)
 	public RecordPersister recordPersister() {
-		return new RecordPersister(Instant.now());
+		return new RecordPersister();
 	}
 
     @Bean
     @Scope(value="thread", proxyMode=ScopedProxyMode.TARGET_CLASS)
     public RecordFetcher recordFetcher() {
-        return new RecordFetcher(Instant.now());
+        return new RecordFetcher();
     }
 
 	// This needs the static modifier due to https://jira.springsource.org/browse/SPR-8269. If not static, field jdbcJndiName

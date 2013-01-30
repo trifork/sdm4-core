@@ -57,7 +57,11 @@ public class RecordFetcher {
         this.transactionTime = new Instant();
     }
 
-	public Record fetchCurrent(String key, RecordSpecification recordSpecification,
+    public void setTransactionTime(Instant transactionTime) {
+        this.transactionTime = transactionTime;
+    }
+
+    public Record fetchCurrent(String key, RecordSpecification recordSpecification,
                                String lookupColumn) {
         // KPN ValidTo does not have to be null as long as it is in the future it is ok
         //             futhermore ValidFrom should be checked here aswell

@@ -1,5 +1,6 @@
 package dk.nsi.sdm4.core.parser;
 
+import dk.nsi.sdm4.core.persistence.recordpersister.RecordFetcher;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogger;
@@ -17,6 +18,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -65,6 +68,11 @@ public class ParserExecutorTest {
 		public RecordPersister persister() {
 			return Mockito.mock(RecordPersister.class);
 		}
+
+        @Bean
+        public RecordFetcher fetcher() {
+            return Mockito.mock(RecordFetcher.class);
+        }
 
 		@Bean
 		ImportStatusRepository importStatusRepository() {

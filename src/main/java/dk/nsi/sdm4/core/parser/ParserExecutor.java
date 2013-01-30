@@ -1,5 +1,6 @@
 package dk.nsi.sdm4.core.parser;
 
+import dk.nsi.sdm4.core.persistence.recordpersister.RecordFetcher;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogItem;
@@ -31,6 +32,9 @@ public class ParserExecutor {
 	@Autowired
 	RecordPersister recordPersister;
 
+    @Autowired
+    RecordFetcher recordFetcher;
+
 	@Autowired
 	private SLALogger slaLogger;
 
@@ -57,7 +61,10 @@ public class ParserExecutor {
 
 				if (dataSet != null) {
 					logDatasetContents(dataSet);
+                    // Make sure persister and fetcher uses exact same time
 					recordPersister.resetTransactionTime();
+                    recordFetcher.setTransactionTime(recordPersister.getTransactionTime());
+
 					importStatusRepo.importStartedAt(new DateTime());
 					parser.process(dataSet);
 

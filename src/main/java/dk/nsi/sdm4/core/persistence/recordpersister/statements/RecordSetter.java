@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
 
@@ -59,11 +60,23 @@ public abstract class RecordSetter implements PreparedStatementSetter {
                                             int index) throws SQLException {
         Object fieldVal = record.get(fieldSpecification.name);
         if (fieldSpecification.type == ALPHANUMERICAL) {
-            statement.setString(index, (String) fieldVal);
+            if (fieldVal == null) {
+                statement.setNull(index, Types.VARCHAR);
+            } else {
+                statement.setString(index, (String) fieldVal);
+            }
         } else if (fieldSpecification.type == FieldSpecification.RecordFieldType.NUMERICAL) {
-            statement.setLong(index, (Long) fieldVal);
+            if (fieldVal == null) {
+                statement.setNull(index, Types.BIGINT);
+            } else {
+                statement.setLong(index, (Long) fieldVal);
+            }
         } else if (fieldSpecification.type == FieldSpecification.RecordFieldType.DECIMAL10_3) {
-            statement.setDouble(index, (Double) fieldVal);
+            if (fieldVal == null) {
+                statement.setNull(index, Types.DECIMAL);
+            } else {
+                statement.setDouble(index, (Double) fieldVal);
+            }
         } else {
             throw new AssertionError("RecordType was not set correctly in the specification");
         }

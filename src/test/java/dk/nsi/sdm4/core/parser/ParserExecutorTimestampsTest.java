@@ -106,10 +106,17 @@ public class ParserExecutorTimestampsTest {
 		@Bean
 		@Scope(value="thread", proxyMode= ScopedProxyMode.TARGET_CLASS)
 		public RecordPersister persister() {
-			return new RecordPersister(Instant.now());
+			return new RecordPersister();
 		}
 
-		@Bean
+        @Bean
+        @Scope(value="thread", proxyMode= ScopedProxyMode.TARGET_CLASS)
+        public RecordFetcher fetcher() {
+            return new RecordFetcher();
+        }
+
+
+        @Bean
 		public Inbox inbox() {
 			return mock(Inbox.class);
 		}
