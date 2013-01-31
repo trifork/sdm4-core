@@ -11,9 +11,8 @@
 Use 4.5 instead
 
 ## sdm-core 4.5
-*  NSPSUPPORT-185: sdm4-Bemyndigelseimporter opdaterer rækker selvom der ikke er ændringer
-    Added extra RecordPersister implementation, but default behavior is unchanged
-*  Make sure persister and fetcher always have the exact same transaction time
+*  NSPSUPPORT-188: Importere der benytter sdm4-core 4.4 får fejl når en record forsøges opdateret - 'expected 1 found 2'
+    -FIX:  Make sure persister and fetcher always have the exact same transaction time
 *  Allow insertion of null values in fields
 !! Make sure to test properly if upgrading to this version, fetcher fetchcurrent has more conditions added
    however it should make no different in the components using it is inserting correct validFrom.
