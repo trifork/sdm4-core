@@ -16,3 +16,6 @@ Use 4.5 instead
 *  Allow insertion of null values in fields
 !! Make sure to test properly if upgrading to this version, fetcher fetchcurrent has more conditions added
    however it should make no different in the components using it is inserting correct validFrom.
+
+## sdm-core 4.6
+* NSPSUPPORT-189 Tillad filer større end 4gb's at blive importeret.

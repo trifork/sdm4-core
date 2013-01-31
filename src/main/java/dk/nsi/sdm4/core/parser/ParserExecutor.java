@@ -5,6 +5,7 @@ import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.core.status.ImportStatusRepository;
 import dk.sdsd.nsp.slalog.api.SLALogItem;
 import dk.sdsd.nsp.slalog.api.SLALogger;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -13,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.security.MessageDigest;
 
 /**
  * Ansvarlig for at foretage jævnlige kørsler af én importer samt at skaffe den inddata.
@@ -103,17 +104,34 @@ public class ParserExecutor {
 		StringBuilder message = new StringBuilder("Begin processing of dataset, datasetDir=").append(dataSet.getAbsoluteFile());
 		for (File file : dataSet.listFiles()) {
 			message.append(", file=").append(file.getAbsolutePath());
-			message.append(", md5=").append(DigestUtils.md5Hex(readFile(file)));
+			message.append(", md5=").append(createMd5Checksum(file.getAbsolutePath()));
 		}
 
 		logger.info(message.toString());
 	}
 
-	private byte[] readFile(File file) {
-		try {
-			return FileUtils.readFileToByteArray(file);
-		} catch (IOException e) {
-			throw new ParserException("Unable to read file " + file.getAbsolutePath());
-		}
-	}
+    /**
+     * Calculate md5 checksum of a file.
+     * @param filename
+     * @return
+     */
+    private String createMd5Checksum(String filename) {
+        String md5 = "";
+        try {
+            InputStream inputStream = new FileInputStream(filename);
+            byte[] buffer = new byte[16384];
+
+            MessageDigest digester = MessageDigest.getInstance("MD5");
+            int readden;
+            while ((readden = inputStream.read(buffer)) != -1) {
+                digester.update(buffer, 0, readden);
+            }
+            inputStream.close();
+            byte[] digest = digester.digest();
+            md5 = String.valueOf(Hex.encodeHex(digest));
+        } catch (Exception e) {
+            logger.warn("Failed to calculate MD5 for file " + filename, e);
+        }
+        return md5;
+    }
 }
