@@ -109,6 +109,25 @@ public class RecordFetcherTest {
 		fetcher.fetchCurrent("Far", recordSpecification);
 	}
 
+    @Test
+    public void canFindRecordWithKeyThatIsNull() throws SQLException {
+        Record recordWithNull = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", null).build();
+        persister.persist(recordWithNull, recordSpecification);
+        Record fetched = fetcher.fetchCurrent(null, recordSpecification);
+        assertNotNull(fetched);
+        assertEquals(recordWithNull, fetched);
+    }
+
+    @Test
+    public void canFindRecordWithMetaWithKeyThatIsNull() throws SQLException {
+        Record recordWithNull = new RecordBuilder(recordSpecification).field("Foo", 42).field("Moo", null).build();
+        persister.persist(recordWithNull, recordSpecification);
+        RecordWithMetadata fetched = fetcher.fetchCurrentWithMeta(null, recordSpecification);
+        assertNotNull(fetched);
+        assertNotNull(fetched.getRecord());
+        assertEquals(recordWithNull, fetched.getRecord());
+    }
+
 	@Test
 	public void returnsNullWhenNoRecordExists() throws SQLException {
 		assertNull(fetcher.fetchCurrent("Far", recordSpecification));

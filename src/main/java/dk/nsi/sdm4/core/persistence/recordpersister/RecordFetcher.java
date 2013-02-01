@@ -65,14 +65,21 @@ public class RecordFetcher {
                                String lookupColumn) {
         // KPN ValidTo does not have to be null as long as it is in the future it is ok
         //             futhermore ValidFrom should be checked here aswell
-		String sql = String.format("SELECT * FROM %s WHERE %s = ? AND (validTo IS NULL OR validTo > ?) AND (validFrom <= ?)" ,
-                recordSpecification.getTable(), lookupColumn);
-
+        Timestamp validAtStamp = new Timestamp(transactionTime.getMillis());
 		Record record;
 		try {
-            Timestamp validAtStamp = new Timestamp(transactionTime.getMillis());
-            record = jdbcTemplate.queryForObject(sql,
-                    new RecordRowsetMapper(recordSpecification), key, validAtStamp, validAtStamp);
+            if (key != null) {
+                String sql = String.format("SELECT * FROM %s WHERE %s = ? AND (validTo IS NULL OR validTo > ?) AND (validFrom <= ?)" ,
+                        recordSpecification.getTable(), lookupColumn);
+                record = jdbcTemplate.queryForObject(sql,
+                        new RecordRowsetMapper(recordSpecification), key, validAtStamp, validAtStamp);
+            } else {
+                // A record could have a key with null as value.
+                String sql = String.format("SELECT * FROM %s WHERE %s IS NULL AND (validTo IS NULL OR validTo > ?) AND (validFrom <= ?)" ,
+                        recordSpecification.getTable(), lookupColumn);
+                record = jdbcTemplate.queryForObject(sql,
+                        new RecordRowsetMapper(recordSpecification), validAtStamp, validAtStamp);
+            }
 		} catch (EmptyResultDataAccessException e) {
 			// når der ingen åben record er, forventer klienter bare at vi returnerer null
 			return null;
@@ -101,21 +108,28 @@ public class RecordFetcher {
 
     /**
      * Fetch a record including metadata that was valid at a specific time.
-     * @param key
-     * @param validAt
-     * @param recordSpecification
-     * @return
+     * @param key Key value of record that should be fetched
+     * @param validAt When should the record be valid
+     * @param recordSpecification Record specification
+     * @return The found record or null if no record was found
      */
     public RecordWithMetadata fetchWithMetaAt(String key, Instant validAt, RecordSpecification recordSpecification) {
         String keyColumn = recordSpecification.getKeyColumn();
-        String queryString = String.format("SELECT * FROM %s WHERE %s=? " +
-                "AND ValidFrom <= ? AND (ValidTo IS NULL OR ValidTo > ?) ", recordSpecification.getTable(), keyColumn);
-
+        Timestamp validAtStamp = new Timestamp(validAt.getMillis());
         RecordWithMetadata recordWithMeta;
         try {
-            Timestamp validAtStamp = new Timestamp(validAt.getMillis());
-            recordWithMeta = jdbcTemplate.queryForObject(queryString,
-                    new RecordMetaRowsetMapper(recordSpecification), key, validAtStamp, validAtStamp);
+            // Some register also uses null as id
+            if (key != null) {
+                String queryString = String.format("SELECT * FROM %s WHERE %s=? " +
+                        "AND ValidFrom <= ? AND (ValidTo IS NULL OR ValidTo > ?) ", recordSpecification.getTable(), keyColumn);
+                recordWithMeta = jdbcTemplate.queryForObject(queryString,
+                        new RecordMetaRowsetMapper(recordSpecification), key, validAtStamp, validAtStamp);
+            } else {
+                String queryString = String.format("SELECT * FROM %s WHERE %s IS NULL " +
+                        "AND ValidFrom <= ? AND (ValidTo IS NULL OR ValidTo > ?) ", recordSpecification.getTable(), keyColumn);
+                recordWithMeta = jdbcTemplate.queryForObject(queryString,
+                        new RecordMetaRowsetMapper(recordSpecification), validAtStamp, validAtStamp);
+            }
         } catch (EmptyResultDataAccessException e) {
             // når der ingen åben recordWithMeta er, forventer klienter bare at vi returnerer null
             return null;
@@ -152,11 +166,20 @@ public class RecordFetcher {
 
 				if (fieldSpec.persistField) {
 					String fieldName = fieldSpec.name;
-
 					if (fieldSpec.type == NUMERICAL) {
-						builder.field(fieldName, resultSet.getLong(fieldName));
+                        long fieldVal = resultSet.getLong(fieldName);
+                        if (resultSet.wasNull()) {
+                            builder.field(fieldName, null);
+                        } else {
+                            builder.field(fieldName, fieldVal);
+                        }
 					} else if (fieldSpec.type == DECIMAL10_3) {
-						builder.field(fieldName, resultSet.getDouble(fieldName));
+                        double fieldVal = resultSet.getDouble(fieldName);
+                        if (resultSet.wasNull()) {
+                            builder.field(fieldName, null);
+                        } else {
+                            builder.field(fieldName, fieldVal);
+                        }
 					} else if (fieldSpec.type == ALPHANUMERICAL) {
 						builder.field(fieldName, resultSet.getString(fieldName));
 					} else {

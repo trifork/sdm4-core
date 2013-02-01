@@ -19,3 +19,6 @@ Use 4.5 instead
 
 ## sdm-core 4.6
 * NSPSUPPORT-189 Tillad filer større end 4gb's at blive importeret.
+* Tillad nøgle værdier kan være null når man henter data op (i forbindelse med NSPSUPPORT-182)
+* Map altid database NULLs til java NULLs tidligere mappede den til 0 hvis det var decimal eller numeric
+  (i forbindelse med NSPSUPPORT-182)
