@@ -15,6 +15,7 @@ import org.joda.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -60,6 +61,7 @@ public abstract class StamdataConfiguration {
 	}
 
 	@Bean
+    @Primary
 	public DataSource dataSource() throws Exception {
 		JndiObjectFactoryBean factory = new JndiObjectFactoryBean();
 		factory.setJndiName(jdbcJNDIName);
