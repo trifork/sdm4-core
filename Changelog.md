@@ -22,3 +22,10 @@ Use 4.5 instead
 * Tillad nøgle værdier kan være null når man henter data op (i forbindelse med NSPSUPPORT-182)
 * Map altid database NULLs til java NULLs tidligere mappede den til 0 hvis det var decimal eller numeric
   (i forbindelse med NSPSUPPORT-182)
+
+## sdm-core 4.7
+* Added @Primary annotation to datasource to allow multiple datasources in importers
+
+## sdm-core 4.8
+* Fields in records specs can now be of calculated type, which will not be counted when parsing input files.
+* Added MD5Generator as it is needed in multiple importers

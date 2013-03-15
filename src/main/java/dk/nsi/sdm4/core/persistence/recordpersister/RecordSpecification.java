@@ -72,7 +72,9 @@ public class RecordSpecification {
 	public int acceptedTotalLineLength() {
 		int totalLength = 0;
 		for (FieldSpecification fieldSpecification : fields) {
-			totalLength += fieldSpecification.length;
+            if (!fieldSpecification.calculatedField) {
+			    totalLength += fieldSpecification.length;
+            }
 		}
 		return totalLength;
 	}

@@ -50,6 +50,12 @@ public class SingleLineRecordParserTest {
 		assertNull(record.get("testField"));
 	}
 
+    @Test
+    public void ignoresCalculatedField() {
+        SingleLineRecordParser parser = makeParser(FieldSpecification.field("testField", 5, false).calculated());
+        parser.parseLine("");
+    }
+
 	private SingleLineRecordParser makeParser(FieldSpecification... fields) {
 		return new SingleLineRecordParser(RecordSpecification.createSpecification("testTable", "testKeyColumn", fields));
 	}

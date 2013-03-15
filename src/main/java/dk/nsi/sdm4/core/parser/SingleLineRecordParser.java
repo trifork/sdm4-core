@@ -53,7 +53,7 @@ public class SingleLineRecordParser {
         int offset = 0;
 
         for (FieldSpecification fieldSpecification : recordSpecification.getFieldSpecs()) {
-	        if (!fieldSpecification.ignored) {
+	        if (!fieldSpecification.ignored && !fieldSpecification.calculatedField) {
 	            String subString = line.substring(offset, offset + fieldSpecification.length);
 
 		        String trimmedValue = subString.trim();
@@ -73,8 +73,10 @@ public class SingleLineRecordParser {
 	                throw new AssertionError("Should match exactly one of the types alphanumerical or numerical.");
 	            }
 	        }
-
-            offset += fieldSpecification.length;
+            // Calculated fields does not count
+            if (!fieldSpecification.calculatedField) {
+                offset += fieldSpecification.length;
+            }
         }
 
         return builder.build();
