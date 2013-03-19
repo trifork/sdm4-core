@@ -69,13 +69,13 @@ public class RecordFetcher {
 		Record record;
 		try {
             if (key != null) {
-                String sql = String.format("SELECT * FROM %s WHERE %s = ? AND (validTo IS NULL OR validTo > ?) AND (validFrom <= ?)" ,
+                String sql = String.format("SELECT * FROM %s WHERE %s = ? AND (ValidTo IS NULL OR ValidTo > ?) AND (ValidFrom <= ?)",
                         recordSpecification.getTable(), lookupColumn);
                 record = jdbcTemplate.queryForObject(sql,
                         new RecordRowsetMapper(recordSpecification), key, validAtStamp, validAtStamp);
             } else {
                 // A record could have a key with null as value.
-                String sql = String.format("SELECT * FROM %s WHERE %s IS NULL AND (validTo IS NULL OR validTo > ?) AND (validFrom <= ?)" ,
+                String sql = String.format("SELECT * FROM %s WHERE %s IS NULL AND (ValidTo IS NULL OR ValidTo > ?) AND (ValidFrom <= ?)",
                         recordSpecification.getTable(), lookupColumn);
                 record = jdbcTemplate.queryForObject(sql,
                         new RecordRowsetMapper(recordSpecification), validAtStamp, validAtStamp);
@@ -98,9 +98,9 @@ public class RecordFetcher {
 
     /**
      * Fetch currently valid record including metadata
-     * @param key
-     * @param recordSpecification
-     * @return
+     * @param key key of record to find
+     * @param recordSpecification specification
+     * @return count
      */
     public RecordWithMetadata fetchCurrentWithMeta(String key, RecordSpecification recordSpecification) {
         return fetchWithMetaAt(key, transactionTime, recordSpecification);
