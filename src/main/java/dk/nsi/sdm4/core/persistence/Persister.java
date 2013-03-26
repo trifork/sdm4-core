@@ -60,5 +60,7 @@ public interface Persister {
 	 */
 	public <T extends TemporalEntity> void persistDeltaDataset(Dataset<T> dataset) throws Exception;
 
-	void persist(Object entity) throws SQLException, IllegalArgumentException, java.lang.IllegalAccessException, InvocationTargetException;
+    public void persist(Object entity) throws SQLException, IllegalArgumentException, java.lang.IllegalAccessException, InvocationTargetException;
+
+    public void resetTransactionTime();
 }

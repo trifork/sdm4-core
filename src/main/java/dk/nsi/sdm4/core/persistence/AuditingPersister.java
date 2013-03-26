@@ -51,8 +51,12 @@ public class AuditingPersister implements Persister {
 	DataSource dataSource;
 
 	public AuditingPersister() {
-		this.transactionTime = new Date();
+        resetTransactionTime();
 	}
+
+    public void resetTransactionTime() {
+        this.transactionTime = new Date();
+    }
 
 	public void persistCompleteDataset(Collection<CompleteDataset<? extends TemporalEntity>> datasets) throws Exception {
 		// TODO: Remove this method. We should use the version below.

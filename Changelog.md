@@ -30,3 +30,6 @@ Use 4.5 instead
 * Fields in records specs can now be of calculated type, which will not be counted when parsing input files.
 * Added MD5Generator as it is needed in multiple importers
 * Fix typo in fetchCurrent
+
+## sdm-core 4.9
+* Added reset transaction time to persister to fix SDM-23
