@@ -53,7 +53,7 @@ public class ImportStatusRepositoryJdbcImplTest {
 		public Parser fakeParser() {
 			return new Parser() {
 				@Override
-				public void process(File dataSet) throws ParserException {
+				public void process(File dataSet, String identifier) throws ParserException {
 					throw new UnsupportedOperationException("process");
 				}
 

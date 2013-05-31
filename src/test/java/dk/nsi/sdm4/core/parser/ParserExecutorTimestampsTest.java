@@ -74,7 +74,7 @@ public class ParserExecutorTimestampsTest {
 				public final RecordSpecification RECORD_SPECIFICATION = RecordSpecification.createSpecification("ParserExecutorTimestampsTest", "Column1", FieldSpecification.field("Column1", 1, false));
 
 				@Override
-				public void process(File dataSet) throws ParserException {
+				public void process(File dataSet, String identifier) throws ParserException {
 					for (int i = 0; i < NUMBER_OF_RECORDS_TO_CREATE; i++) {
 						Record record = new RecordBuilder(RECORD_SPECIFICATION).field("Column1", "v").build();
 						try {

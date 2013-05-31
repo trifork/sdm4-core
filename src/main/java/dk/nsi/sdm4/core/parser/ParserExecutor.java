@@ -10,6 +10,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,10 +49,13 @@ public class ParserExecutor {
 	 * Håndterer SLA-logning for hele importen og etablerer en transaktion, importer kører i.
 	 */
 	public void run() {
-		String parserIdentifier = parser.getHome();
-		SLALogItem slaLogItem = slaLogger.createLogItem("ParserExecutor", "Executing parser " + parserIdentifier);
-
-		try {
+        // We are using the SLA logger for parsers aswell
+        // To tie runs together we create an identifier that add as message id to the sla log
+        String parserIdentifier = parser.getHome();
+        String runIdentifier = parserIdentifier + "-" + Instant.now().getMillis();
+		SLALogItem slaLogItem = slaLogger.createLogItem(parserIdentifier+".ParserExecutor", "SDM4CORE_ENTRY");
+        slaLogItem.setMessageId(runIdentifier);
+        try {
 			if (!inbox.isLocked()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Running parser " + parser.getHome());
@@ -67,7 +71,7 @@ public class ParserExecutor {
                     recordFetcher.setTransactionTime(recordPersister.getTransactionTime());
 
 					importStatusRepo.importStartedAt(new DateTime());
-					parser.process(dataSet);
+					parser.process(dataSet, runIdentifier);
 
 					// Once the import is complete
 					// we can remove the data set

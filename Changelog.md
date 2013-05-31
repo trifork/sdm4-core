@@ -33,3 +33,6 @@ Use 4.5 instead
 
 ## sdm-core 4.9
 * Added reset transaction time to persister to fix SDM-23
+
+## sdm-core 4.10
+* Udvidet parser interface og standardiseret logning fra ParserExecuter (som del af SDM-5)

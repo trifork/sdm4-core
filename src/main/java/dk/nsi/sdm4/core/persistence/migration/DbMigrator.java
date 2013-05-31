@@ -49,6 +49,7 @@ public class DbMigrator {
 			if (!migrationHasBeenRun(migration)) {
 				MySQLSqlScript script = new MySQLSqlScript(migration.getSql(), PlaceholderReplacer.NO_PLACEHOLDERS);
 				script.execute(jdbcTemplate);
+
 				jdbcTemplate.update("INSERT INTO " + METADATA_TABLE_NAME + " (version, description, installed_by) VALUES (?, ?, SUBSTRING_INDEX(USER(),'@',1))",
 						migration.getVersion(), migration.getDescription());
 				if (log.isDebugEnabled()) {

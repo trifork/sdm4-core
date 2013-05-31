@@ -36,6 +36,10 @@ import java.io.File;
  * @author Thomas Børlum <thb@trifork.com>
  */
 public interface Parser {
+
+    public final static String SLA_RECORDS_PROCESSED_MAME = "processed_records";
+    public final static String SLA_INPUT_NAME = "input";
+
 	/**
 	 * Processes a data set and persists the data.
 	 * <p/>
@@ -51,10 +55,11 @@ public interface Parser {
 	 * You should only log on DEBUG level. See {@linkplain Parser parser}.
 	 *
 	 * @param dataSet the root directory of the file set. Data files are contained within the directory.
+     * @param identifier identifer for this "parse run"
 	 * @throws OutOfSequenceException if the data set is out of sequence in the expected order.
 	 * @throws ParserException        if anything parser specific error happens or unexpected happens.
 	 */
-	void process(File dataSet) throws ParserException;
+	void process(File dataSet, String identifier) throws ParserException;
 
 	String getHome();
 }

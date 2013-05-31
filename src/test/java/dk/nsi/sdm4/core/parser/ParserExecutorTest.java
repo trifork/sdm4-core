@@ -114,7 +114,7 @@ public class ParserExecutorTest {
 	@Test
 	public void shouldLockAParserIfItFails() throws Exception {
 		whenInboxIsNotLockedAndHasSomeFileInIt();
-		Mockito.doThrow(new RuntimeException()).when(parser).process(any(File.class));
+		Mockito.doThrow(new RuntimeException()).when(parser).process(any(File.class), any(String.class));
 
 		try {
 			executor.run();
@@ -133,7 +133,7 @@ public class ParserExecutorTest {
 
 		executor.run();
 
-		Mockito.verify(parser, Mockito.times(0)).process(any(File.class));
+		Mockito.verify(parser, Mockito.times(0)).process(any(File.class), any(String.class));
 	}
 
 	@Test
@@ -156,7 +156,7 @@ public class ParserExecutorTest {
 
 		InOrder inOrder = Mockito.inOrder(parser, inbox);
 
-		inOrder.verify(parser).process(any(File.class));
+		inOrder.verify(parser).process(any(File.class), any(String.class));
 		inOrder.verify(inbox).advance();
 	}
 
@@ -173,7 +173,7 @@ public class ParserExecutorTest {
 	@Test
 	public void shouldSetErrorStatusIfTheParserThrowsException() throws Exception {
 		whenInboxIsNotLockedAndHasSomeFileInIt();
-		Mockito.doThrow(new RuntimeException("parser cannot parse")).when(parser).process(any(File.class));
+		Mockito.doThrow(new RuntimeException("parser cannot parse")).when(parser).process(any(File.class), any(String.class));
 
 		try {
 			executor.run();
@@ -189,7 +189,7 @@ public class ParserExecutorTest {
 	public void shouldRethrowIfTheParserThrowsException() throws Exception {
 		whenInboxIsNotLockedAndHasSomeFileInIt();
 		RuntimeException parserException = new RuntimeException("parser cannot parse");
-		Mockito.doThrow(parserException).when(parser).process(any(File.class));
+		Mockito.doThrow(parserException).when(parser).process(any(File.class), any(String.class));
 
 		try {
 			executor.run();
@@ -216,7 +216,7 @@ public class ParserExecutorTest {
 		executor.run();
 
 		Mockito.verify(persister).resetTransactionTime();
-		Mockito.verify(parser).process(any(File.class));
+		Mockito.verify(parser).process(any(File.class), any(String.class));
 	}
 
 	@Test
