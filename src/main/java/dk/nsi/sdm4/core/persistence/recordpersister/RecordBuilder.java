@@ -24,11 +24,11 @@
  */
 package dk.nsi.sdm4.core.persistence.recordpersister;
 
+import java.util.Date;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.*;
 
 public class RecordBuilder {
 	private RecordSpecification recordSpecification;
@@ -39,17 +39,29 @@ public class RecordBuilder {
 		record = new Record();
 	}
 
-	public RecordBuilder field(String fieldName, long value) {
+    public RecordBuilder field(String fieldName, long value) {
+        return field(fieldName, value, NUMERICAL);
+    }
+
+	public RecordBuilder field(String fieldName, Long value) {
 		return field(fieldName, value, NUMERICAL);
 	}
 
-	public RecordBuilder field(String fieldName, double value) {
+    public RecordBuilder field(String fieldName, double value) {
+        return field(fieldName, value, DECIMAL10_3);
+    }
+
+	public RecordBuilder field(String fieldName, Double value) {
 		return field(fieldName, value, DECIMAL10_3);
 	}
 
 	public RecordBuilder field(String fieldName, String value) {
 		return field(fieldName, value, ALPHANUMERICAL);
 	}
+
+    public RecordBuilder field(String fieldName, Date value) {
+        return field(fieldName, value, DATETIME);
+    }
 
 	private RecordBuilder field(String fieldName, Object value, FieldSpecification.RecordFieldType recordFieldType) {
 		checkNotNull(fieldName);
@@ -75,6 +87,8 @@ public class RecordBuilder {
 					record = record.put(fieldSpecification.name, "D");
 				} else if (fieldSpecification.type == NUMERICAL) {
 					record = record.put(fieldSpecification.name, 0);
+                } else if (fieldSpecification.type == DATETIME) {
+                    record = record.put(fieldSpecification.name, new Date());
 				} else {
 					throw new AssertionError("");
 				}

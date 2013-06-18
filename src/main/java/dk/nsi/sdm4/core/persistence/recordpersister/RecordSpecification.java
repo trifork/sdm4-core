@@ -32,9 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.DECIMAL10_3;
-import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.NUMERICAL;
+import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.*;
 
 public class RecordSpecification {
 	private final String table;
@@ -109,6 +107,12 @@ public class RecordSpecification {
 								}
 							}
 						}
+                    } else if (fieldsSpecification.type == DATETIME) {
+                        if(value == null && fieldsSpecification.isOptional()) {
+                            // ok, field is optional
+                        } else if (value != null && !(value instanceof java.util.Date)) {
+                            return false;
+                        }
 					} else {
 						throw new AssertionError("Field specification is in illegal state. Type must be set.");
 					}

@@ -34,6 +34,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.*;
 
@@ -169,20 +170,22 @@ public class RecordFetcher {
 					if (fieldSpec.type == NUMERICAL) {
                         long fieldVal = resultSet.getLong(fieldName);
                         if (resultSet.wasNull()) {
-                            builder.field(fieldName, null);
+                            builder.field(fieldName, (Long)null);
                         } else {
                             builder.field(fieldName, fieldVal);
                         }
 					} else if (fieldSpec.type == DECIMAL10_3) {
                         double fieldVal = resultSet.getDouble(fieldName);
                         if (resultSet.wasNull()) {
-                            builder.field(fieldName, null);
+                            builder.field(fieldName, (Double)null);
                         } else {
                             builder.field(fieldName, fieldVal);
                         }
 					} else if (fieldSpec.type == ALPHANUMERICAL) {
 						builder.field(fieldName, resultSet.getString(fieldName));
-					} else {
+					} else if (fieldSpec.type == DATETIME) {
+                        builder.field(fieldName, resultSet.getDate(fieldName));
+                    } else {
 						throw new AssertionError("Invalid field specifier " + fieldSpec.type + " used");
 					}
 				}

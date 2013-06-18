@@ -30,9 +30,7 @@ import dk.nsi.sdm4.core.persistence.recordpersister.Record;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordSpecification;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.RecordFieldType.ALPHANUMERICAL;
 
@@ -76,6 +74,13 @@ public abstract class RecordSetter implements PreparedStatementSetter {
                 statement.setNull(index, Types.DECIMAL);
             } else {
                 statement.setDouble(index, (Double) fieldVal);
+            }
+        } else if (fieldSpecification.type == FieldSpecification.RecordFieldType.DATETIME) {
+            if (fieldVal == null) {
+                statement.setNull(index, Types.TIMESTAMP);
+            } else {
+                Date dateVal = (Date) fieldVal;
+                statement.setTimestamp(index, new Timestamp(dateVal.getTime()));
             }
         } else {
             throw new AssertionError("RecordType was not set correctly in the specification");

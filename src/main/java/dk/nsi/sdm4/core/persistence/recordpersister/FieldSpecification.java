@@ -14,7 +14,8 @@ public class FieldSpecification {
 	public static enum RecordFieldType {
 		ALPHANUMERICAL,
 		NUMERICAL,
-		DECIMAL10_3
+		DECIMAL10_3,
+        DATETIME
 	}
 
 	private FieldSpecification(String name, RecordFieldType type, int length, boolean persistField, boolean ignored,
@@ -32,8 +33,14 @@ public class FieldSpecification {
 	 * Returns a copy of the field with a numerical entry
 	 */
 	public FieldSpecification numerical() {
-		return new FieldSpecification(name, RecordFieldType.NUMERICAL, length, persistField, ignored, optional, calculatedField);
+		return new FieldSpecification(
+                name, RecordFieldType.NUMERICAL, length, persistField, ignored, optional, calculatedField);
 	}
+
+    public FieldSpecification datetime() {
+        return new FieldSpecification(
+                name, RecordFieldType.DATETIME, length, persistField, ignored, optional, calculatedField);
+    }
 
 	/**
 	 * Returns a copy of the field that will not be persisted
@@ -50,7 +57,8 @@ public class FieldSpecification {
 	 * Returns a copy of the field with a decimal(10,3) entry
 	 */
 	public FieldSpecification decimal10_3() {
-		return new FieldSpecification(name, RecordFieldType.DECIMAL10_3, length, persistField, ignored, optional, calculatedField);
+		return new FieldSpecification(
+                name, RecordFieldType.DECIMAL10_3, length, persistField, ignored, optional, calculatedField);
 	}
 
 	/**
